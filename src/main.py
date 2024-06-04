@@ -16,7 +16,9 @@ from src.handlers.registry import store
 
 async def main():
     await init_templates()
-    application = Application.builder().token(settings.get("bot", "token")).build()
+    application = (
+        Application.builder().token(settings.get("bot", "token")).build()
+    )
 
     conversation_handler = ConversationHandler(
         entry_points=[CommandHandler("start", lambda: None)],
