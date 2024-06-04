@@ -10,7 +10,8 @@ init_env:
 	cp .env.template .env
 
 start:
-	@pass
+	@echo "Start cyber bot"
+	@python src/main.py
 
 normalize:
 	isort ./src

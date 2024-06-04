@@ -1,3 +1,5 @@
+import asyncio
+
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -14,7 +16,7 @@ from src.handlers.registry import store
 
 async def main():
     await init_templates()
-    application = Application.builder().token(settings.get("TOKEN")).build()
+    application = Application.builder().token(settings.get("bot", "token")).build()
 
     conversation_handler = ConversationHandler(
         entry_points=[CommandHandler("start", lambda: None)],
@@ -33,4 +35,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Dict, LiteralString
 
 import aiofiles
 
@@ -8,7 +8,7 @@ from src.core.settings import BASE_DIR
 TEMPALTES: Dict = {}
 
 
-async def _read_template(path: str) -> None:
+async def _read_template(path: str | bytes | LiteralString) -> None:
     if '.md' not in path:
         return
 
@@ -20,4 +20,4 @@ async def _read_template(path: str) -> None:
 async def init_templates() -> None:
     for (root, _, files) in os.walk(os.path.join(BASE_DIR, 'src', 'templates')):
         for _template in files:
-            await _read_template(os.path.join(root, _template).decode())
+            await _read_template(os.path.join(root, _template))
