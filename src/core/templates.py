@@ -5,7 +5,7 @@ import aiofiles
 
 from src.core.settings import BASE_DIR
 
-TEMPALTES: Dict = {}
+TEMPLATES: Dict = {}
 
 
 async def _read_template(path: str | bytes | LiteralString) -> None:
@@ -14,7 +14,7 @@ async def _read_template(path: str | bytes | LiteralString) -> None:
 
     async with aiofiles.open(path, mode="r", encoding="utf-8") as t:
         _, name = os.path.split(path)
-        TEMPALTES[name] = await t.read()
+        TEMPLATES[name] = await t.read()
 
 
 async def init_templates() -> None:
