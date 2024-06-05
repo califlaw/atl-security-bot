@@ -30,7 +30,7 @@ class DBPool:
 
         # reformat SQL string to ascii style
         query = re.sub(r"\s+", " ", query).strip().lower()
-        for key in named_args:
+        for key in named_args.keys():
             query = query.replace(f"%({key})s", positional_map[key])
 
         positional_items = sorted(
