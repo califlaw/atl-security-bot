@@ -1,7 +1,7 @@
 from typing import Dict
 
 from telegram import BotCommandScopeDefault
-from telegram.ext import Application, CommandHandler
+from telegram.ext import Application
 
 users_commands: Dict[str, str] = {
     "help": "help",
@@ -14,14 +14,16 @@ admin_commands: Dict[str, str] = {
 }
 
 
-async def set_default_commands(app: Application):
-    remove_default_commands(app)
+async def set_default_commands(_application: Application):
+    remove_default_commands(_application)
 
-    for command, description in users_commands:
-        app.add_handler(
-            CommandHandler(command=command, description=description),
-        )
+    _application.bot.set_my_commands(
+        [
+            (command, description)
+            for (command, description) in users_commands.items()
+        ]
+    )
 
 
-def remove_default_commands(update: Application) -> None:
-    update.remove_handler(scope=BotCommandScopeDefault())
+def remove_default_commands(_application: Application) -> None:
+    _application.bot.set_my_commands(scope=BotCommandScopeDefault())
