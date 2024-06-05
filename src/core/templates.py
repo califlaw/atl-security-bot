@@ -21,3 +21,11 @@ async def init_templates() -> None:
     for root, _, files in os.walk(os.path.join(BASE_DIR, "src", "templates")):
         for _template in files:
             await _read_template(os.path.join(root, _template))
+
+
+def render_template(name: str, mapping: dict) -> str:
+    if name not in TEMPLATES:
+        raise FileNotFoundError(f'Template {name} not found')
+
+    _t: str = TEMPLATES.get(name + ".md")
+    return _t.format_map(mapping)

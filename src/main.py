@@ -18,7 +18,7 @@ from src.keyboards.default_handlers import set_default_commands
 
 async def post_init(_application: Application) -> None:
     await init_templates()
-    _application.bot_data["database"] = await DBPool.init_db()
+    _application.bot_data["database"] = await DBPool().init_db()
     await set_default_commands(_application=_application)
 
 
