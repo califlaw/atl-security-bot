@@ -13,3 +13,7 @@ class StatusEnum(StrEnum):
     review = "review"
     resolved = "resolved"
     declined = "declined"
+
+
+class TemplateFiles(StrEnum):
+    init_claim = "init_claim"

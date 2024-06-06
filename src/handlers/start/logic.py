@@ -1,8 +1,8 @@
 from telegram import InlineKeyboardButton, Update
 from telegram.ext import ContextTypes
 
-from src.claims.operations import Claim
 from src.core.templates import render_template
+from src.dto.claim import Claim
 from src.handlers.mode import DEFAULT_PARSE_MODE
 from src.keyboards.menu import make_reply_markup
 
@@ -11,7 +11,11 @@ async def start_bot_dialogs(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     claim = Claim(db=context.bot_data["database"])
-    await claim.initiation_claim(update.effective_message.text)
+    await claim.initiation_claim(
+        payload={
+            'comment': update.effective_message.text
+        }
+    )
 
     button_list = [
         InlineKeyboardButton("col1", callback_data=...),

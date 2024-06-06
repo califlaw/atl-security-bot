@@ -4,8 +4,8 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from src.handlers.base import BaseHandlerKlass
+from src.handlers.enums import HandlerStateEnum
 from src.handlers.start.logic import start_bot_dialogs
-from src.handlers.states import HandlerStateEnum
 
 
 class StartHandler(BaseHandlerKlass):

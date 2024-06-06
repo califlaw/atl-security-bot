@@ -1,32 +1,27 @@
 from typing import Dict
 
-from src.core.database import DBPool
-from src.handlers.states import StatusEnum
+from src.dto.base import BaseDTO
+from src.handlers.enums import StatusEnum
 
 
-class Claim:
-    _db: DBPool
-
-    def __init__(self, db: DBPool):
-        self._db = db
-
+class Claim(BaseDTO):
     async def initiation_claim(self, payload: Dict):
         return await self._db.execute_query(
             """
             insert into claims values ()
             """,
-            params={},
+            params=payload,
         )
 
     async def set_status_claim(self, claim_id: int, status: StatusEnum):
-        if status not in StatusEnum:
-            raise KeyError(f'{status} not included key in StatusEnum')
+        if status not in StatusEnum._value2member_map_:  # noqa
+            raise KeyError(f"{status} not included key in StatusEnum")
 
         await self._db.execute_query(
             """
             update claims set status = %(status)s where id = %(id)
             """,
-            params={'id': claim_id, 'status': status.value}
+            params={"id": claim_id, "status": status.value},
         )
 
     async def get_accepted_claim(self):

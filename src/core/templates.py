@@ -4,6 +4,7 @@ from typing import Dict, LiteralString
 import aiofiles
 
 from src.core.settings import BASE_DIR
+from src.handlers.enums import TemplateFiles
 
 TEMPLATES: Dict = {}
 
@@ -24,8 +25,8 @@ async def init_templates() -> None:
 
 
 def render_template(name: str, mapping: dict) -> str:
-    if name not in TEMPLATES:
-        raise FileNotFoundError(f'Template {name} not found')
+    if name not in TemplateFiles._value2member_map_:  # noqa
+        raise FileNotFoundError(f"Template {name} not found")
 
     _t: str = TEMPLATES.get(name + ".md")
     return _t.format_map(mapping)

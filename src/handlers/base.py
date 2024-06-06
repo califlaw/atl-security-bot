@@ -3,7 +3,7 @@ from typing import Callable
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from src.handlers.states import HandlerStateEnum
+from src.handlers.enums import HandlerStateEnum
 
 
 class BaseHandlerKlass:
