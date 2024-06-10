@@ -3,9 +3,14 @@ loggingLevel = INFO
 
 [bot]
 token =
-admins =
+operators =
 superGroupId =
 
 [database]
 dsn = postgresql://user:password@localhost:5432/dbname
 poolSize = 10
+
+[virus.total]
+token =
+timeout = 10
+version = 0.18.2

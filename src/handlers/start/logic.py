@@ -11,11 +11,7 @@ async def start_bot_dialogs(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     claim = Claim(db=context.bot_data["database"])
-    await claim.initiation_claim(
-        payload={
-            'comment': update.effective_message.text
-        }
-    )
+    await claim.initiation_claim(payload={"comment": update.message.text})
 
     button_list = [
         InlineKeyboardButton("col1", callback_data=...),

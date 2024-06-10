@@ -47,7 +47,7 @@ class DBPool:
 
     async def execute_query(
         self, query: str, params: Dict[str, Any] | None = None
-    ) -> List[Record] | None:
+    ) -> Record | List[Record] | None:
         _query, positional_args = self._format2psql(
             query=query, named_args=params
         )

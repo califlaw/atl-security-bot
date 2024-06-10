@@ -1,6 +1,7 @@
 from typing import Dict
 
 from telegram import (
+    Bot,
     BotCommandScope,
     BotCommandScopeChat,
     BotCommandScopeDefault,
@@ -10,13 +11,14 @@ from telegram.ext import Application
 from src.core.settings import settings
 
 users_commands: Dict[str, str] = {
-    "help": "help",
-    "start": "lolkek",
-    "menu": "main menu with earning schemes",
+    "help": "🆘 Получить помощь",
+    "start": "🗃 Начать работу бота по заявкам",
 }
 
-admin_commands: Dict[str, str] = {
-    "settings": "setting information about you",
+operator_commands: Dict[str, str] = {
+    "check": "🕶 Взять в обработку заявку",
+    "commit": "🎯 Внести комментарий и решение",
+    "resolve": "✅ Завершить обработку заявки",
 }
 
 
@@ -28,7 +30,7 @@ async def set_default_commands(_application: Application):
     async def _set_commands(
         commands: dict, scope: BotCommandScope | None = None
     ):
-        await _application.bot.set_my_commands(
+        await _application.bot.set_my_commands(  # type: Bot
             [
                 (command, description)
                 for (command, description) in commands.items()
@@ -39,7 +41,7 @@ async def set_default_commands(_application: Application):
     await _remove_default_commands(_application)
     await _set_commands(users_commands)
 
-    for admin_id in settings.getlist("bot", "admins"):
+    for operator_id in settings.getlist("bot", "operators"):
         await _set_commands(
-            admin_commands, scope=BotCommandScopeChat(chat_id=admin_id)
+            operator_commands, scope=BotCommandScopeChat(chat_id=operator_id)
         )
