@@ -2,11 +2,14 @@ import os
 from typing import Dict, LiteralString
 
 import aiofiles
+import structlog
 
+from src.core.logger import log_event
 from src.core.settings import BASE_DIR
 from src.handlers.enums import TemplateFiles
 
 TEMPLATES: Dict = {}
+logger: structlog.BoundLogger = structlog.stdlib.get_logger("core.templates")
 
 
 async def _read_template(path: str | bytes | LiteralString) -> None:
@@ -16,6 +19,7 @@ async def _read_template(path: str | bytes | LiteralString) -> None:
     async with aiofiles.open(path, mode="r", encoding="utf-8") as t:
         _, name = os.path.split(path)
         TEMPLATES[name] = await t.read()
+        await log_event(logger, message=f"Init file template: {name}")
 
 
 async def init_templates() -> None:

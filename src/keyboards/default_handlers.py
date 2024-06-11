@@ -6,6 +6,7 @@ from telegram import (
     BotCommandScopeChat,
     BotCommandScopeDefault,
 )
+from telegram.error import BadRequest
 from telegram.ext import Application
 
 from src.core.settings import settings
@@ -42,6 +43,10 @@ async def set_default_commands(_application: Application):
     await _set_commands(users_commands)
 
     for operator_id in settings.getlist("bot", "operators"):
-        await _set_commands(
-            operator_commands, scope=BotCommandScopeChat(chat_id=operator_id)
-        )
+        try:
+            await _set_commands(
+                operator_commands,
+                scope=BotCommandScopeChat(chat_id=operator_id),
+            )
+        except BadRequest:
+            pass

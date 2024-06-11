@@ -1,8 +1,8 @@
 from collections import defaultdict
 
-from . import StartHandler
+from . import *
 
 store = defaultdict()
 
-for hd in [StartHandler]:
+for hd in [StartHandler, ResolveHandler, CommitHandler, CheckHandler]:
     store[hd.state] = hd
