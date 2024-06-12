@@ -1,3 +1,7 @@
+import sentry_sdk
+from sentry_sdk.integrations.asyncio import AsyncioIntegration
+from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
+from sentry_sdk.integrations.httpx import HttpxIntegration
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -17,6 +21,17 @@ from src.keyboards.default_handlers import set_default_commands
 
 async def post_init(_application: Application) -> None:
     from src.core.templates import init_templates
+
+    if sentry_dsn := settings.get("DEFAULT", "sentryDsn"):
+        sentry_sdk.init(
+            dsn=sentry_dsn,
+            sample_rate=1.0,
+            integrations=[
+                HttpxIntegration(),
+                AsyncPGIntegration(),
+                AsyncioIntegration(),
+            ],
+        )
 
     await init_templates()
     _application.bot_data["database"] = await DBPool().init_db()

@@ -1,6 +1,7 @@
 [DEFAULT]
 jsonLog = true
 loggingLevel = INFO
+sentryDsn =
 
 [bot]
 token =
