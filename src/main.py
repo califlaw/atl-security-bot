@@ -39,9 +39,7 @@ async def post_init(_application: Application) -> None:
 
 
 async def post_shutdown(_application: Application) -> None:
-    _db = _application.bot_data.get("database")
-    if _db:
-        await _db.close()
+    await _application.bot_data.get("database").close()
 
 
 def main():
