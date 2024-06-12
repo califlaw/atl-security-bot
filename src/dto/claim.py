@@ -1,14 +1,14 @@
 import io
 import os
 from dataclasses import dataclass
-from io import BufferedReader
 from typing import Dict, List, Sequence
 
 import aiofiles
 from asyncpg import Record
-from telegram import Document, File
+from telegram import Document, File, User
 
 from src.core.settings import BASE_DIR
+from src.dto.author import Author
 from src.dto.base import BaseDTO
 from src.handlers.enums import StatusEnum
 
@@ -16,6 +16,11 @@ from src.handlers.enums import StatusEnum
 @dataclass(kw_only=True)
 class Claim(BaseDTO):
     _id: int
+    _author: Author
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._author = Author(db=self.db)
 
     def get_attachment_path(self, from_root: bool = False):
         _root = BASE_DIR if from_root else ""
@@ -49,16 +54,31 @@ class Claim(BaseDTO):
                 await img.write(buf.getbuffer())
 
     async def initiation_claim(
-        self, payload: Dict, images: Sequence[BufferedReader] | None = None
+        self,
+        author: User,
+        payload: Dict,
+        images: Sequence[Document] | None = None,
     ):
-        claim = await self.db.execute_query(
+        _strong_field: str = "phone" if "phone" in payload.keys() else "link"
+        await self.check_payload(
+            required_fields=["type", _strong_field],
+            payload=payload,
+        )
+        payload["author"] = await self._author.set_author(author=author)
+
+        claim: Record = await self.db.execute_query(
             """
-            insert into claims values () returning id;
+            insert into claims (type, author, decision, phone, link, status)
+            values (
+                '%(type)s', '%(author)s', null, 
+                '%(phone)s', '%(link)s', 'accepted'
+            ) returning id;
             """,
             params=payload,
         )
         if images:
-            claim.id
+            self._id = claim.id
+            await self._save_images(images=images)
 
     async def set_status_claim(self, status: StatusEnum):
         if status not in StatusEnum._value2member_map_:  # noqa
