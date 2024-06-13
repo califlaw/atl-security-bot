@@ -3,6 +3,7 @@ from typing import Dict, LiteralString
 
 import aiofiles
 import structlog
+from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
 from src.core.settings import BASE_DIR
@@ -33,4 +34,4 @@ def render_template(name: str, mapping: dict) -> str:
         raise FileNotFoundError(f"Template {name} not found")
 
     _t: str = TEMPLATES.get(name + ".md")
-    return _t.format_map(mapping)
+    return escape_markdown(_t.format_map(mapping), version=2, entity_type=None)

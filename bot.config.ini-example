@@ -2,6 +2,7 @@
 jsonLog = true
 loggingLevel = INFO
 sentryDsn =
+environment = dev
 
 [bot]
 token =

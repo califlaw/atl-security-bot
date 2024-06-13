@@ -23,9 +23,12 @@ async def post_init(_application: Application) -> None:
     from src.core.templates import init_templates
 
     if sentry_dsn := settings.get("DEFAULT", "sentryDsn"):
+        _env = settings.get("DEFAULT", "environment", fallback="dev")
         sentry_sdk.init(
             dsn=sentry_dsn,
+            environment=_env,
             sample_rate=1.0,
+            profiles_sample_rate=1.0,
             integrations=[
                 HttpxIntegration(),
                 AsyncPGIntegration(),

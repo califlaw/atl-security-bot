@@ -4,5 +4,5 @@ from . import *
 
 store = defaultdict()
 
-for hd in [StartHandler, ResolveHandler, CommitHandler, CheckHandler]:
+for hd in [StartHandler, CheckHandler]:
     store[hd.state] = hd

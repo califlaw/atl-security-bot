@@ -1,25 +1,31 @@
 from typing import Dict
 
+import structlog
 from telegram import (
     Bot,
     BotCommandScope,
     BotCommandScopeChat,
     BotCommandScopeDefault,
+    ChatFullInfo,
 )
 from telegram.error import BadRequest
 from telegram.ext import Application
 
 from src.core.settings import settings
 
-users_commands: Dict[str, str] = {
+logger = structlog.stdlib.get_logger("keyboard.main")
+
+user_commands: Dict[str, str] = {
     "help": "🆘 Получить помощь",
     "start": "🗃 Начать работу бота по заявкам",
+    "checknumber": "📱Проверить номер телефона",
+    "checklink": "🔗 Проверить ссылку",
+    "complain": "💣 Пожаловаться на номер",
 }
 
 operator_commands: Dict[str, str] = {
-    "check": "🕶 Взять в обработку заявку",
-    "commit": "🎯 Внести комментарий и решение",
-    "resolve": "✅ Завершить обработку заявки",
+    "startcheck": "👮🏼 Взять в обработку заявку",
+    "total": "📊 Количество жалоб за все время",
 }
 
 
@@ -40,13 +46,15 @@ async def set_default_commands(_application: Application):
         )
 
     await _remove_default_commands(_application)
-    await _set_commands(users_commands)
+    await _set_commands(user_commands)
 
-    for operator_id in settings.getlist("bot", "operators"):
+    for operator in settings.getlist("bot", "operators", fallback=[]):
         try:
+            op = await _application.bot.get_chat(operator)  # type: ChatFullInfo
             await _set_commands(
                 operator_commands,
-                scope=BotCommandScopeChat(chat_id=operator_id),
+                scope=BotCommandScopeChat(chat_id=op.id),
             )
-        except BadRequest:
+            logger.info(f"Operator commands set for {operator} (ID: {op.id}).")
+        except BadRequest as e:
             pass
