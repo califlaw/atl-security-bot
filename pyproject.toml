@@ -16,6 +16,7 @@ aiofiles = "^23.2.1"
 structlog = "^24.1.0"
 asyncpg = "^0.29.0"
 orjson = "^3.10.4"
+phonenumbers = "^8.13.39"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.24.0"

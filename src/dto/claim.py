@@ -1,22 +1,35 @@
 import io
 import os
 from dataclasses import dataclass
-from typing import Dict, List, Sequence
+from datetime import datetime
+from typing import Dict, List, Literal, Sequence
 
 import aiofiles
 from asyncpg import Record
 from telegram import Document, File, User
 
+from src.core.normalizer import NormalizePhoneNumber
 from src.core.settings import BASE_DIR
 from src.dto.author import Author
 from src.dto.base import BaseDTO
 from src.handlers.enums import StatusEnum
+
+normalizer = NormalizePhoneNumber()
 
 
 @dataclass(kw_only=True)
 class Claim(BaseDTO):
     _id: int
     _author: Author
+
+    id: int | None
+    status: StatusEnum | None
+    created_at: datetime | None
+    type: Literal["phone", "url"] | None
+    comment: str | None
+    decision: str | None
+    phone: str | None
+    link: str | None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -66,6 +79,11 @@ class Claim(BaseDTO):
         )
         payload["author"] = await self._author.set_author(author=author)
 
+        if _strong_field == "phone":
+            payload["phone"] = normalizer.normalize(
+                payload["phone"], as_db=True
+            )
+
         claim: Record = await self.db.execute_query(
             """
             insert into claims (type, author, decision, phone, link, status)
@@ -80,6 +98,15 @@ class Claim(BaseDTO):
             self._id = claim.id
             await self._save_images(images=images)
 
+    async def get_detail_claim(self, status: StatusEnum = StatusEnum.accepted):
+        claim = await self.db.execute_query(
+            f"""
+            select * from claims where status = '{status.value}' 
+            order by created_at limit 1
+            """
+        )
+        return self.__class__(**claim, db=None)
+
     async def set_status_claim(self, status: StatusEnum):
         if status not in StatusEnum._value2member_map_:  # noqa
             raise KeyError(f"{status} not included key in StatusEnum")
@@ -92,12 +119,7 @@ class Claim(BaseDTO):
         )
 
     async def get_accepted_claim(self):
-        claim = await self.db.execute_query(
-            """
-            select * from claims where status = 'accepted' 
-            order by created_at limit 1
-            """
-        )
+        claim = await self.get_detail_claim()
         self._id = claim.id
         claim.images = await self._attach_images()
 

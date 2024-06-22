@@ -29,9 +29,12 @@ async def init_templates() -> None:
             await _read_template(os.path.join(root, _template))
 
 
-def render_template(name: str, mapping: dict) -> str:
+def render_template(name: str, mapping: dict | None = None) -> str:
     if name not in TemplateFiles._value2member_map_:  # noqa
         raise FileNotFoundError(f"Template {name} not found")
+
+    if not isinstance(mapping, dict):
+        mapping = {}
 
     _t: str = TEMPLATES.get(name + ".md")
     return escape_markdown(_t.format_map(mapping), version=2, entity_type=None)

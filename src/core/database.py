@@ -29,13 +29,15 @@ class DBPool:
 
     @staticmethod
     def _format2psql(
-        query: str, named_args: Dict[str, Any]
+        query: str, named_args: Dict[str, Any] | None = None
     ) -> Tuple[str, List[Any]]:
         positional_generator = itertools.count(1)
         positional_map = collections.defaultdict(
             lambda: "${}".format(next(positional_generator))
         )
 
+        if not named_args:
+            named_args = {}
         # reformat SQL string to ascii style
         query = re.sub(r"\s+", " ", query).strip().lower()
         for key in named_args.keys():

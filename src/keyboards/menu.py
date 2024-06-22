@@ -31,6 +31,20 @@ def build_menu(
 
 
 def make_reply_markup(
-    button_list: List[InlineKeyboardButton], colls: int
+    button_list: List[InlineKeyboardButton],
+    colls: int,
+    header_buttons: InlineKeyboardButton
+    | List[InlineKeyboardButton]
+    | None = None,
+    footer_buttons: InlineKeyboardButton
+    | List[InlineKeyboardButton]
+    | None = None,
 ) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(build_menu(button_list, n_cols=colls))
+    return InlineKeyboardMarkup(
+        build_menu(
+            button_list,
+            n_cols=colls,
+            header_buttons=header_buttons,
+            footer_buttons=footer_buttons,
+        )
+    )

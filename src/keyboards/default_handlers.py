@@ -6,7 +6,6 @@ from telegram import (
     BotCommandScope,
     BotCommandScopeChat,
     BotCommandScopeDefault,
-    ChatFullInfo,
 )
 from telegram.error import BadRequest
 from telegram.ext import Application
@@ -24,7 +23,7 @@ user_commands: Dict[str, str] = {
 }
 
 operator_commands: Dict[str, str] = {
-    "startcheck": "👮🏼 Взять в обработку заявку",
+    "startcheck": "👮🏼 Взять заявку в обработку",
     "total": "📊 Количество жалоб за все время",
 }
 
@@ -49,12 +48,13 @@ async def set_default_commands(_application: Application):
     await _set_commands(user_commands)
 
     for operator in settings.getlist("bot", "operators", fallback=[]):
+        _bot = _application.bot  # type: Bot
+
         try:
-            op = await _application.bot.get_chat(operator)  # type: ChatFullInfo
             await _set_commands(
                 operator_commands,
-                scope=BotCommandScopeChat(chat_id=op.id),
+                scope=BotCommandScopeChat(chat_id=operator),
             )
-            logger.info(f"Operator commands set for {operator} (ID: {op.id}).")
+            logger.info(f"Operator commands set {operator}")
         except BadRequest as e:
             pass

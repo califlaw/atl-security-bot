@@ -16,6 +16,7 @@ class StatusEnum(StrEnum):
 
 
 class TemplateFiles(StrEnum):
+    help = "help"
     start = "start"
     total = "total"
     init_claim = "init_claim"

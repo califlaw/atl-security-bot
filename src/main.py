@@ -3,19 +3,12 @@ from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
 from sentry_sdk.integrations.httpx import HttpxIntegration
 from telegram import Update
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import Application
 
 from src.core.database import DBPool
 from src.core.logger import set_default_params_log
-from src.core.settings import settings
-from src.handlers import StartHandler
-from src.handlers.registry import store
+from src.core.settings import local_app, settings
+from src.handlers.registry import registration_handlers
 from src.keyboards.default_handlers import set_default_commands
 
 
@@ -58,18 +51,10 @@ def main():
         .token(settings.get("bot", "token"))
         .build()
     )
+    local_app.app = application
 
-    conversation_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", StartHandler.logic)],
-        states={
-            state: [MessageHandler(filters=None, callback=klass.logic)]
-            for (state, klass) in store.items()
-        },
-        fallbacks=[MessageHandler(filters.Regex("^Done$"), lambda: None)],
-        name="conversation",
-        persistent=False,
-    )
-    application.add_handler(conversation_handler)
+    # registration logic commands
+    registration_handlers(application=application)
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)
