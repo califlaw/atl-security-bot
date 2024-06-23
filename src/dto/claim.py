@@ -72,17 +72,19 @@ class Claim(BaseDTO):
         payload: Dict,
         images: Sequence[Document] | None = None,
     ):
-        _strong_field: str = "phone" if "phone" in payload.keys() else "link"
+        _key_phone = "phone"
+        _strong_field: str = (
+            _key_phone if _key_phone in payload.keys() else "link"
+        )
         await self.check_payload(
             required_fields=["type", _strong_field],
             payload=payload,
         )
         payload["author"] = await self._author.set_author(author=author)
 
-        if _strong_field == "phone":
-            payload["phone"] = normalizer.normalize(
-                payload["phone"], as_db=True
-            )
+        # phone field normalization value
+        if phone := payload.get(_key_phone) and _strong_field == _key_phone:
+            payload[_key_phone] = normalizer.normalize(phone=phone, as_db=True)
 
         claim: Record = await self.db.execute_query(
             """
