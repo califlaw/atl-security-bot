@@ -27,6 +27,7 @@ If your want deploy bot on your server, you just need fill up settings file ([bo
 Set constants on registered bot name and start image code by command:
 
 ```shell
+$ make init_config
 $ make start
 ```
 ***
