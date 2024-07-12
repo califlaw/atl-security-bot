@@ -42,7 +42,7 @@ class BaseDTO(Record):
         return True
 
     def _from_record(self, record: Record) -> Self:
-        for key in record:
+        for key in record.keys():
             setattr(self, key, record.get(key, None))
 
         return self
