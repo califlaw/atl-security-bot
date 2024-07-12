@@ -6,7 +6,6 @@ from typing import Any, Dict, List, Tuple
 
 import asyncpg
 import structlog
-from asyncpg import Connection, Pool, Record
 
 from src.core.logger import log_event
 from src.core.settings import settings
@@ -15,7 +14,7 @@ logger = structlog.stdlib.get_logger("core.database")
 
 
 class DBPool:
-    _pool: Pool = None
+    _pool: asyncpg.Pool = None
 
     async def init_db(self):
         self._pool = await asyncpg.create_pool(
@@ -58,11 +57,11 @@ class DBPool:
 
     async def execute_query(
         self, query: str, params: Dict[str, Any] | None = None
-    ) -> Record | List[Record] | None:
+    ) -> asyncpg.Record | List[asyncpg.Record] | None:
         _query, positional_args = self._format2psql(
             query=query, named_args=params
         )
-        if settings.getboolean("database", "debug"):
+        if settings.getboolean("database", "debug"):  # type: bool
             await log_event(
                 logger,
                 level=logging.DEBUG,
@@ -70,7 +69,7 @@ class DBPool:
                 payload={"args": positional_args},
             )
 
-        async with self._pool.acquire() as conn:  # type: Connection
+        async with self._pool.acquire() as conn:  # type: asyncpg.Connection
             try:
                 if "insert" in _query or "update" in _query:
                     await conn.execute(query, positional_args)

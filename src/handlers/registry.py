@@ -30,7 +30,7 @@ def registration_handlers(application: Application) -> None:
         states={
             state: [
                 CallbackQueryHandler(callback=klass.logic)
-                if klass.is_query
+                if klass.is_query and not klass.filters
                 else MessageHandler(
                     filters=klass.filters, callback=klass.logic
                 )
@@ -49,7 +49,7 @@ def registration_handlers(application: Application) -> None:
         states={
             state: [
                 CallbackQueryHandler(callback=klass.logic)
-                if klass.is_query
+                if klass.is_query and not klass.filters
                 else MessageHandler(
                     filters=klass.filters, callback=klass.logic
                 )

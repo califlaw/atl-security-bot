@@ -2,11 +2,12 @@ import io
 import os
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Literal, Sequence
+from typing import Any, Dict, List, Literal, Sequence
 
 import aiofiles
 from asyncpg import Record
-from telegram import Document, File, User
+from telegram import Document, File, InputFile, User
+from telegram._utils.files import parse_file_input
 
 from src.core.normalizer import NormalizePhoneNumber
 from src.core.settings import BASE_DIR
@@ -39,18 +40,24 @@ class Claim(BaseDTO):
         _root = BASE_DIR if from_root else ""
         return os.path.join(_root, "attachments", str(self._id))
 
-    async def _attach_images(self) -> List[bytes]:
+    async def _attach_images(self) -> List[str | InputFile | Any]:
         _img_files = []
-        images = await self.db.execute_query(  # type: Record
+        images: List[Record] = await self.db.execute_query(
             "select id, image_path from image where id = %(id)s",
             params={"id": self._id},
         )
         for image in images:
+            _, file_name = os.path.split(image.image_path)
             _path = self.get_attachment_path(from_root=True)
             async with aiofiles.open(
                 f"{_path}/{image.image_path}", mode="rb"
             ) as img:
-                _img_files.append(await img.read())
+                b_img: bytes = await img.read()
+                _img_files.append(
+                    parse_file_input(
+                        b_img, tg_type=Document, filename=file_name
+                    )
+                )
 
         return _img_files
 
@@ -62,7 +69,7 @@ class Claim(BaseDTO):
                 f"{_path}/{image.file_name}", mode="wb"
             ) as img:
                 buf = io.BytesIO()
-                _file = await image.get_file()  # type: File
+                _file: File = await image.get_file()
                 await _file.download_to_memory(out=buf)
                 await img.write(buf.getbuffer())
 

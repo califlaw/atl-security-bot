@@ -28,28 +28,27 @@ operator_commands: Dict[str, str] = {
 }
 
 
-async def _remove_default_commands(_application: Application) -> None:
-    await _application.bot.delete_my_commands(scope=BotCommandScopeDefault())
-
-
 async def set_default_commands(_application: Application):
+    _bot: Bot = _application.bot
+
+    async def _remove_default_commands() -> None:
+        await _bot.delete_my_commands(scope=BotCommandScopeDefault())
+
     async def _set_commands(
-        commands: dict, scope: BotCommandScope | None = None
+        commands: Dict, scope: BotCommandScope | None = None
     ):
-        await _application.bot.set_my_commands(  # type: Bot
-            [
+        await _bot.set_my_commands(
+            commands=[
                 (command, description)
                 for (command, description) in commands.items()
             ],
             scope=scope,
         )
 
-    await _remove_default_commands(_application)
+    await _remove_default_commands()
     await _set_commands(user_commands)
 
     for operator in settings.getlist("bot", "operators", fallback=[]):
-        _bot = _application.bot  # type: Bot
-
         try:
             await _set_commands(
                 operator_commands,
@@ -57,4 +56,5 @@ async def set_default_commands(_application: Application):
             )
             logger.info(f"Operator commands set {operator}")
         except BadRequest as e:
+            await logger.ainfo(f"Chat not found for {operator}: {e}")
             pass
