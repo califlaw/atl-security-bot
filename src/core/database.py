@@ -2,7 +2,7 @@ import collections
 import itertools
 import logging
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Type
 
 import asyncpg
 import structlog
@@ -56,7 +56,10 @@ class DBPool:
         await log_event(logger, message="Database connect closed")
 
     async def execute_query(
-        self, query: str, params: Dict[str, Any] | None = None
+        self,
+        query: str,
+        params: Dict[str, Any] | None = None,
+        record: Type[asyncpg.Record] = asyncpg.Record,
     ) -> asyncpg.Record | List[asyncpg.Record] | None:
         _query, positional_args = self._format2psql(
             query=query, named_args=params
@@ -74,6 +77,14 @@ class DBPool:
                 if "insert" in _query or "update" in _query:
                     await conn.execute(query, positional_args)
                 else:
-                    return await conn.fetch(query, positional_args)
+                    results: List[asyncpg.Record] | None = await conn.fetch(
+                        query,
+                        positional_args,
+                        record_class=record,
+                    )
+                    if len(results) == 1:
+                        # yep, will return extracted object of type: Record
+                        return results[0]
+                    return results
             finally:
                 await self._pool.release(conn)

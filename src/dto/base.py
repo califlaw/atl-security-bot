@@ -1,5 +1,5 @@
-from dataclasses import asdict, dataclass
-from typing import Dict, List, Type
+from dataclasses import dataclass
+from typing import Dict, List, Self, Type
 
 import structlog
 from asyncpg import Record
@@ -11,10 +11,11 @@ logger = structlog.stdlib.get_logger(__name__)
 
 
 @dataclass
-class BaseDTO:
+class BaseDTO(Record):
     db: DBPool
 
-    def __init__(self, db: DBPool):
+    def __init__(self, db: DBPool, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.db = db
 
     @staticmethod
@@ -40,9 +41,8 @@ class BaseDTO:
 
         return True
 
-    def to_dict(self):
-        return asdict(self)
+    def _from_record(self, record: Record) -> Self:
+        for key in record:
+            setattr(self, key, record.get(key, None))
 
-    @staticmethod
-    def from_record(record: Record) -> "Type[Claim]":
-        return record
+        return self
