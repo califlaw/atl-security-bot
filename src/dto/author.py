@@ -10,7 +10,7 @@ class Author(BaseDTO):
     full_name: str | None
     tg_user_id: str | None
 
-    async def try_find_author(self, author: User) -> Record["Author"]:
+    async def try_find_author(self, author: User) -> Record:
         result = await self.db.execute_query(
             """
             select * from author where tg_user_id = '%(tg_id)s'
@@ -23,7 +23,7 @@ class Author(BaseDTO):
 
         return result
 
-    async def set_author(self, author: User) -> Record[int]:
+    async def set_author(self, author: User) -> Record:
         try:
             if _author := await self.try_find_author(author=author):
                 return _author.id

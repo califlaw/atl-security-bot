@@ -11,7 +11,7 @@ init_config:
 
 start:
 	@echo "Start cyber bot"
-	@python src/main.py
+	@python -m src.main
 
 normalize:
 	isort ./src

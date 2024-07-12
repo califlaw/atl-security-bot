@@ -2,12 +2,12 @@ import sentry_sdk
 from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
 from sentry_sdk.integrations.httpx import HttpxIntegration
-from telegram import Update
 from telegram.ext import Application
 
 from src.core.database import DBPool
 from src.core.logger import set_default_params_log
 from src.core.settings import local_app, settings
+from src.core.updates import ALL_ALLOWED_TYPES
 from src.handlers.registry import registration_handlers
 from src.keyboards.default_handlers import set_default_commands
 
@@ -57,7 +57,7 @@ def main():
     registration_handlers(application=application)
 
     # Run the bot until the user presses Ctrl-C
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    application.run_polling(allowed_updates=ALL_ALLOWED_TYPES)
 
 
 if __name__ == "__main__":

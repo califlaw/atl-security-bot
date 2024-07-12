@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  bot:
+    image: registry.gitlab.com/kdelinxd/bot-cyber-detection
+    container_name: secure-atl-bot
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/opt/app/
+      - ./bot.config.ini:/opt/app/bot.config.ini
+
+  database:
+    image: postgres:15.2-alpine
+    container_name: secure-atl-postgres
+    restart: always
+    env_file:
+      - postgresql-env
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
+
+volumes:
+  postgres-volume: {}
