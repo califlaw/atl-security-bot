@@ -38,7 +38,7 @@ class Claim(BaseDTO):
 
     def get_attachment_path(self, from_root: bool = False):
         _root = BASE_DIR if from_root else ""
-        return os.path.join(_root, "attachments", str(self._id))
+        return os.path.join(_root, "attachments", f"claim-{self._id}")
 
     async def _attach_images(self) -> List[str | InputFile | Any]:
         _img_files = []
@@ -65,9 +65,8 @@ class Claim(BaseDTO):
         _path = self.get_attachment_path()
         os.makedirs(_path, exist_ok=True)
         for image in images:
-            async with aiofiles.open(
-                f"{_path}/{image.file_name}", mode="wb"
-            ) as img:
+            _path = os.path.join(_path, image.file_name)
+            async with aiofiles.open(_path, mode="wb") as img:
                 buf = io.BytesIO()
                 _file: File = await image.get_file()
                 await _file.download_to_memory(out=buf)
@@ -87,7 +86,7 @@ class Claim(BaseDTO):
             required_fields=["type", _strong_field],
             payload=payload,
         )
-        payload["author"] = await self._author.set_author(author=author)
+        payload["author"] = (await self._author.set_author(author=author)).id
 
         # phone field normalization value
         if phone := payload.get(_key_phone) and _strong_field == _key_phone:
