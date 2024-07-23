@@ -1,18 +1,34 @@
-from telegram import CallbackQuery, InlineKeyboardButton, Update
+import structlog
+from telegram import Update
 from telegram.ext import ContextTypes
 
-from src.core.templates import render_template
-from src.dto.claim import Claim
-from src.handlers.enums import HandlerStateEnum
-from src.handlers.mode import DEFAULT_PARSE_MODE
-from src.keyboards.menu import make_reply_markup
+from src.core.logger import log_event
+from src.dto.claim import ClaimDTO
+from src.handlers.complain.enums import HandlerStateEnum
+
+logger = structlog.stdlib.get_logger("handlers.complain")
 
 
 async def complain_phone_callback(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> HandlerStateEnum:
-    query: CallbackQuery = update.callback_query
-    await query.answer()
-    await query.edit_message_text("")
+) -> int:
+    await update.effective_chat.send_message("Введите номер телефона")
+    return HandlerStateEnum.AWAIT_PHONE.value
 
-    return HandlerStateEnum.TYPING_REPLY.value
+
+async def complain_parse_phone_ask_platform_callback(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    await log_event(
+        logger, "Fetch message", payload={"msg": update.message.text}
+    )
+    await ClaimDTO(db=context.bot_data["database"]).initiation_claim(
+        author=update.effective_user,
+        payload={"phone": update.message.text, "type": "phone"},
+        images=None,
+    )
+    await update.message.reply_text(
+        "Место инцидента? (lalafo.kg, instagram, и тд)"
+    )
+
+    return HandlerStateEnum.AWAIT_PLATFORM.value

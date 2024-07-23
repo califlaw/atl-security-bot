@@ -4,6 +4,7 @@ import structlog
 from telegram import (
     Bot,
     BotCommandScope,
+    BotCommandScopeAllPrivateChats,
     BotCommandScopeChat,
     BotCommandScopeDefault,
 )
@@ -46,15 +47,16 @@ async def set_default_commands(_application: Application):
         )
 
     await _remove_default_commands()
-    await _set_commands(user_commands)
+    await _set_commands(user_commands, scope=BotCommandScopeAllPrivateChats())
 
-    for operator in settings.getlist("bot", "operators", fallback=[]):
+    for op_id in settings.getlist("bot", "operators", fallback=[]):  # type: int
         try:
+            op = await _bot.get_chat(chat_id=op_id)
             await _set_commands(
                 operator_commands,
-                scope=BotCommandScopeChat(chat_id=operator),
+                scope=BotCommandScopeChat(chat_id=op.id),
             )
-            logger.info(f"Operator commands set {operator}")
+            logger.info(f"Operator commands set {op_id}")
         except BadRequest as e:
-            await logger.ainfo(f"Chat not found for {operator}: {e}")
+            await logger.ainfo(f"Chat not found for {op_id}: {e}")
             pass

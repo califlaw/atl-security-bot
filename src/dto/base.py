@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from typing import Dict, List, Self, Type
+from typing import Dict, List, Self, Tuple
 
 import structlog
 from asyncpg import Record
@@ -10,8 +9,7 @@ from src.core.logger import log_event
 logger = structlog.stdlib.get_logger(__name__)
 
 
-@dataclass
-class BaseDTO(Record):
+class BaseDTO:
     db: DBPool
 
     def __init__(self, db: DBPool, *args, **kwargs):
@@ -19,7 +17,9 @@ class BaseDTO(Record):
         self.db = db
 
     @staticmethod
-    async def check_payload(required_fields: List[str], payload: Dict):
+    async def check_missed_payload(
+        required_fields: List[str], payload: Dict
+    ) -> Tuple[bool, List[str]]:
         """
         Checks if all the required fields are present in the payload.
 
@@ -37,12 +37,6 @@ class BaseDTO(Record):
                 message=f"Check missing fields. Missing fields:",
                 payload={"fields": missing_fields},
             )
-            return False
+            return True, missing_fields
 
-        return True
-
-    def _from_record(self, record: Record) -> Self:
-        for key in record.keys():
-            setattr(self, key, record.get(key, None))
-
-        return self
+        return False, []

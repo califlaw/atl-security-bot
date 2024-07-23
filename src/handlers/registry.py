@@ -15,20 +15,22 @@ from . import *
 _store_link_handlers = defaultdict()
 _store_phone_handlers = defaultdict()
 
-for _phone_hdl in [ComplainHandler]:
+for _phone_hdl in [
+    ParsePhoneWithAskPlatformHandler,
+]:
     _store_phone_handlers[_phone_hdl.state] = _phone_hdl
 
-for _link_hdl in [CheckLinkHandler]:
-    _store_phone_handlers[_link_hdl.state] = _link_hdl
+for _link_hdl in []:
+    _store_link_handlers[_link_hdl.state] = _link_hdl
 
 
 def registration_handlers(application: Application) -> None:
     conversation_url_handler = ConversationHandler(
         entry_points=[
-            CommandHandler(StartHandler.command, StartHandler.logic)
+            CommandHandler(CheckLinkHandler.command, CheckLinkHandler.logic)
         ],
         states={
-            state: [
+            state.value: [
                 CallbackQueryHandler(callback=klass.logic)
                 if klass.is_query and not klass.filters
                 else MessageHandler(
@@ -44,10 +46,12 @@ def registration_handlers(application: Application) -> None:
 
     conversation_phone_handler = ConversationHandler(
         entry_points=[
-            CommandHandler(StartHandler.command, StartHandler.logic)
+            CommandHandler(
+                StartComplainHandler.command, StartComplainHandler.logic
+            )
         ],
         states={
-            state: [
+            state.value: [
                 CallbackQueryHandler(callback=klass.logic)
                 if klass.is_query and not klass.filters
                 else MessageHandler(
@@ -68,6 +72,7 @@ def registration_handlers(application: Application) -> None:
         TotalHandler.command, TotalHandler.logic
     )
     help_handler = CommandHandler(HelpHandler.command, HelpHandler.logic)
+    start_handler = CommandHandler(StartHandler.command, StartHandler.logic)
 
     application.add_handlers(
         [
@@ -75,6 +80,7 @@ def registration_handlers(application: Application) -> None:
             conversation_url_handler,
             check_claim_handler,
             stat_total_handler,
+            start_handler,
             help_handler,
         ]
     )

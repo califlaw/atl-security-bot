@@ -1,10 +1,4 @@
-from enum import Enum, StrEnum
-
-
-class HandlerStateEnum(Enum):
-    CHOOSING = 0
-    TYPING_REPLY = 1
-    TYPING_CHOICE = 2
+from enum import StrEnum
 
 
 class StatusEnum(StrEnum):

@@ -1,8 +1,6 @@
 import io
 import os
-from pathlib import Path
 from typing import Any, List, Sequence
-from uuid import UUID
 
 import aiofiles
 from asyncpg import Record
@@ -12,13 +10,10 @@ from telegram._utils.files import parse_file_input
 from src.core.database import DBPool
 from src.core.settings import BASE_DIR
 from src.dto.base import BaseDTO
+from src.dto.models import Image
 
 
-class Image(BaseDTO):
-    id: UUID | None
-    claim_id: int | None
-    image_path: str | Path | None
-
+class ImageDTO(BaseDTO):
     def __init__(self, db: DBPool, *args, **kwargs):
         super().__init__(db, *args, **kwargs)
 
@@ -33,10 +28,9 @@ class Image(BaseDTO):
         images: List[Record] = await self.db.execute_query(
             "select id, image_path from image where claim_id = %(claim_id)s",
             params={"claim_id": claim_id},
-            record=self.__class__,
+            record=Image,
         )
-        for image in images:
-            image = self._from_record(image)
+        for image in images:  # type: Image
             _, file_name = os.path.split(image.image_path)
             _path = self.get_attachment_path(from_root=True)
             async with aiofiles.open(

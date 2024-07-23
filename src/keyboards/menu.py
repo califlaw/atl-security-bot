@@ -32,7 +32,7 @@ def build_menu(
 
 def make_reply_markup(
     button_list: List[InlineKeyboardButton],
-    colls: int,
+    colls: int = 1,
     header_buttons: InlineKeyboardButton
     | List[InlineKeyboardButton]
     | None = None,

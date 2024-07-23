@@ -21,6 +21,8 @@ class NormalizePhoneNumber:
             phone = phone.replace("0", "+996", 1)
         elif phone.startswith("7"):
             phone = "+" + phone
+        elif phone.startswith("8"):
+            phone = "+7" + phone[1:]
         else:
             if not phone.startswith("+"):
                 phone = "+" + phone

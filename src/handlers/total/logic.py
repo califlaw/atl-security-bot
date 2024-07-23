@@ -1,5 +1,5 @@
 import structlog
-from telegram import InlineKeyboardButton, Update
+from telegram import Update
 from telegram.ext import ContextTypes
 
 from src.core.logger import log_event
@@ -7,7 +7,6 @@ from src.core.templates import render_template
 from src.dto.claim import Claim
 from src.handlers.enums import TemplateFiles
 from src.handlers.mode import DEFAULT_PARSE_MODE
-from src.keyboards.menu import make_reply_markup
 
 logger = structlog.stdlib.get_logger("TotalHandler.logic")
 
@@ -15,18 +14,21 @@ logger = structlog.stdlib.get_logger("TotalHandler.logic")
 async def total_callback(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    claim = Claim(db=context.bot_data["database"])
-    # await claim.initiation_claim(payload={"comment": update.message.text})
+    stat_mapping = await Claim(
+        db=context.bot_data["database"]
+    ).statistic_claims()
 
-    # button_list = [
-    #     InlineKeyboardButton("col1", callback_data=...),
-    #     InlineKeyboardButton("col2", callback_data=...),
-    #     InlineKeyboardButton("row 2", callback_data=...),
-    # ]
-    await log_event(logger, message="smthinfo")
+    _platform_text = ""
+    for platform in stat_mapping["platforms"]:
+        _name = platform["name"]
+        _counter = platform["counter"]
+        _platform_text += f"- {_name}: {_counter}\n"
+
+    stat_mapping["list_platforms"] = _platform_text
+
+    await log_event(logger, message="Calculate common total information")
 
     await update.effective_chat.send_message(
-        text=render_template(TemplateFiles.start, mapping={"lol": "kek"}),
+        text=render_template(TemplateFiles.total, mapping=stat_mapping),
         parse_mode=DEFAULT_PARSE_MODE,
-        # reply_markup=make_reply_markup(button_list=button_list, colls=1),
     )
