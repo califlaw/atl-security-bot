@@ -31,8 +31,10 @@ class ClaimDTO(BaseDTO):
         author: User,
         payload: Dict,
         images: Sequence[Document] | None = None,
-    ) -> None:
+    ) -> Claim:
         _key_phone = "phone"
+        payload["link"] = None
+        payload["phone"] = None
         _strong_field: str = (
             _key_phone if _key_phone in payload.keys() else "link"
         )
@@ -50,10 +52,7 @@ class ClaimDTO(BaseDTO):
 
         # phone field normalization value
         if (phone := payload.get(_key_phone)) and _strong_field == _key_phone:
-            payload["link"] = None
             payload[_key_phone] = normalizer.normalize(phone=phone, as_db=True)
-        else:
-            payload["phone"] = None
 
         claim: Claim = await self.db.execute_query(  # noqa
             """
@@ -70,6 +69,8 @@ class ClaimDTO(BaseDTO):
         )
         if images:
             await self._image.save_images(claim_id=claim.id, images=images)
+
+        return claim
 
     async def get_detail_claim(
         self, status: StatusEnum = StatusEnum.accepted
@@ -91,6 +92,14 @@ class ClaimDTO(BaseDTO):
             update claims set status = %(status)s where id = %(id)
             """,
             params={"id": self._id, "status": status.value},
+        )
+
+    async def set_platform_claim(self, platform: str):
+        await self.db.execute_query(
+            """
+            update claims set platform = %(platform)s where id = %(id)
+            """,
+            params={"id": self._id, "platform": platform},
         )
 
     async def get_accepted_claim(self):

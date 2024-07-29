@@ -15,6 +15,12 @@ class NormalizePhoneNumber:
 
         return _instance
 
+    def try_is_phone(self, phone: str) -> phonenumbers.PhoneNumber | None:
+        try:
+            return self._parse(phone=phone)
+        except ValueError:
+            return None
+
     def normalize(self, phone: str, as_db: bool = False) -> str:
         # fix prefixes of phone number to national variants
         if phone.startswith("0"):

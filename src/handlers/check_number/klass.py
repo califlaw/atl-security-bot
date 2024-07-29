@@ -4,11 +4,11 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from src.handlers.base import BaseHandlerKlass
-from src.handlers.check_link.logic import check_callback
+from src.handlers.check_number.logic import check_callback
 
 
-class StartCheckLinkHandler(BaseHandlerKlass):
-    command: str = "checklink"
+class CheckNumberHandler(BaseHandlerKlass):
+    command: str = "checknumber"
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
         Coroutine[Any, Any, None],

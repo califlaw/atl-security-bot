@@ -24,7 +24,7 @@ user_commands: Dict[str, str] = {
 }
 
 operator_commands: Dict[str, str] = {
-    "startcheck": "👮🏼 Взять заявку в обработку",
+    "startcheck": "👮 Взять заявку в обработку",
     "total": "📊 Количество жалоб за все время",
 }
 
@@ -53,10 +53,12 @@ async def set_default_commands(_application: Application):
         try:
             op = await _bot.get_chat(chat_id=op_id)
             await _set_commands(
-                operator_commands,
+                # both commands of user and operators,
+                # cause operator could make new claim
+                {**user_commands, **operator_commands},
                 scope=BotCommandScopeChat(chat_id=op.id),
             )
-            logger.info(f"Operator commands set {op_id}")
+            await logger.ainfo(f"Operator commands set {op_id}")
         except BadRequest as e:
             await logger.ainfo(f"Chat not found for {op_id}: {e}")
             pass

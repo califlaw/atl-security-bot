@@ -1,9 +1,12 @@
 from .base import BaseHandlerKlass
-from .check_link.klass import CheckLinkHandler
 
 # import impl klass commands
+from .check_number.klass import CheckNumberHandler
+from .check_link.klass import StartCheckLinkHandler
 from .complain.klass import (
-    ParsePhoneWithAskPlatformHandler,
+    ParsePhoneOrLinkWithAskPlatformHandler,
+    ParsePhotosOrStopConvHandler,
+    ParsePlatformAskPhotosHandler,
     StartComplainHandler,
 )
 from .help.klass import HelpHandler

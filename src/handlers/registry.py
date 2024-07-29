@@ -16,7 +16,9 @@ _store_link_handlers = defaultdict()
 _store_phone_handlers = defaultdict()
 
 for _phone_hdl in [
-    ParsePhoneWithAskPlatformHandler,
+    ParsePhoneOrLinkWithAskPlatformHandler,
+    ParsePlatformAskPhotosHandler,
+    ParsePhotosOrStopConvHandler,
 ]:
     _store_phone_handlers[_phone_hdl.state] = _phone_hdl
 
@@ -27,7 +29,9 @@ for _link_hdl in []:
 def registration_handlers(application: Application) -> None:
     conversation_url_handler = ConversationHandler(
         entry_points=[
-            CommandHandler(CheckLinkHandler.command, CheckLinkHandler.logic)
+            CommandHandler(
+                StartCheckLinkHandler.command, StartCheckLinkHandler.logic
+            )
         ],
         states={
             state.value: [
@@ -65,20 +69,22 @@ def registration_handlers(application: Application) -> None:
         persistent=False,
     )
 
-    check_claim_handler = CommandHandler(
+    help_handler = CommandHandler(HelpHandler.command, HelpHandler.logic)
+    start_handler = CommandHandler(StartHandler.command, StartHandler.logic)
+
+    # manager commands
+    start_check_claim_handler = CommandHandler(
         StartCheckHandler.command, StartCheckHandler.logic
     )
     stat_total_handler = CommandHandler(
         TotalHandler.command, TotalHandler.logic
     )
-    help_handler = CommandHandler(HelpHandler.command, HelpHandler.logic)
-    start_handler = CommandHandler(StartHandler.command, StartHandler.logic)
 
     application.add_handlers(
         [
             conversation_phone_handler,
             conversation_url_handler,
-            check_claim_handler,
+            start_check_claim_handler,
             stat_total_handler,
             start_handler,
             help_handler,
