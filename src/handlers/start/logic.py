@@ -2,6 +2,7 @@ import structlog
 from telegram import InlineKeyboardButton, Update
 from telegram.ext import ContextTypes
 
+from src.core.settings import settings
 from src.core.templates import render_template
 from src.handlers.enums import TemplateFiles
 from src.handlers.mode import DEFAULT_PARSE_MODE
@@ -16,7 +17,7 @@ async def start_callback(
     button_list = [
         InlineKeyboardButton(
             "Добавляйтесь в чат-комьюнити",
-            url="https://t.me/+Ey_WXRTHA7E0YmY1",
+            url=settings.get("bot", "communityGroupLink"),
         ),
     ]
 

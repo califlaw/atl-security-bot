@@ -8,6 +8,7 @@ environment = dev
 token =
 operators =
 superGroupId =
+communityGroupLink =
 
 [database]
 dsn = postgresql://user:password@localhost:5432/dbname

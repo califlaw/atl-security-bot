@@ -1,11 +1,12 @@
 import structlog
-from telegram import Update
+from telegram import InlineKeyboardButton, Update
 from telegram.ext import ContextTypes
 
 from src.core.logger import log_event
 from src.core.utils import get_link
 from src.dto.claim import ClaimDTO, normalizer
 from src.handlers.complain.enums import HandlerStateEnum
+from src.keyboards.menu import make_reply_markup
 
 logger = structlog.stdlib.get_logger("handlers.complain")
 
@@ -27,18 +28,19 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     )
 
     phone: str | None = normalizer.try_is_phone(phone=source_claim)
-    if not phone:
-        payload["type"] = "link"
-        payload["link"] = get_link(url=source_claim)
-    else:
+    if phone:
         payload["type"] = "phone"
         payload["phone"] = phone
+    else:
+        payload["type"] = "link"
+        payload["link"] = get_link(url=source_claim)
 
     claim = await ClaimDTO(db=context.bot_data["database"]).initiation_claim(
         author=update.effective_user,
         payload=payload,
         images=None,
     )
+
     context.user_data["claim"] = claim.id
     await update.message.reply_text(
         "Место инцидента? (lalafo.kg, instagram, и тд)"
@@ -70,6 +72,16 @@ async def complain_parse_platform_ask_photos_callback(
     dto._id = claim_id
     await dto.set_platform_claim(platform=platform)
 
-    await update.message.reply_text("Прикрепите фотографии инцидента")
+    button_list = [
+        InlineKeyboardButton(
+            "Пропустить шаг добавления фото/скриншотов",
+            callback_data="skip_photos",
+        ),
+    ]
+
+    await update.message.reply_text(
+        text="Прикрепите фотографии инцидента",
+        reply_markup=make_reply_markup(button_list=button_list, colls=1),
+    )
 
     return HandlerStateEnum.AWAIT_PHOTOS.value
