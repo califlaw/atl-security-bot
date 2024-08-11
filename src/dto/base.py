@@ -1,7 +1,6 @@
-from typing import Dict, List, Self, Tuple
+from typing import Dict, List, Tuple
 
 import structlog
-from asyncpg import Record
 
 from src.core.database import DBPool
 from src.core.logger import log_event

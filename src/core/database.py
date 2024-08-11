@@ -2,7 +2,7 @@ import collections
 import itertools
 import logging
 import re
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any, Dict, List, LiteralString, Tuple, Type
 
 import asyncpg
 import structlog
@@ -57,7 +57,7 @@ class DBPool:
 
     async def execute_query(
         self,
-        query: str,
+        query: LiteralString,
         params: Dict[str, Any] | None = None,
         record: Type[asyncpg.Record] = asyncpg.Record,
     ) -> asyncpg.Record | List[asyncpg.Record] | None:

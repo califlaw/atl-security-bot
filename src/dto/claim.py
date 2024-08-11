@@ -76,10 +76,11 @@ class ClaimDTO(BaseDTO):
         self, status: StatusEnum = StatusEnum.accepted
     ) -> Claim:
         return await self.db.execute_query(  # noqa
-            f"""
-            select * from claims where status = '{status.value}' 
+            """
+            select * from claims where status = %(status)s 
             order by created_at limit 1
             """,
+            params={'status': status.value},
             record=Claim,
         )
 
