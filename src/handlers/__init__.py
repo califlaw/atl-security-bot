@@ -4,6 +4,7 @@ from .check_link.klass import StartCheckLinkHandler
 # import impl klass commands
 from .check_number.klass import CheckNumberHandler
 from .complain.klass import (
+    ExitFallbackPhoneConvHandler,
     ParsePhoneOrLinkWithAskPlatformHandler,
     ParsePhotosOrStopConvHandler,
     ParsePlatformAskPhotosHandler,

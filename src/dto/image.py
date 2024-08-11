@@ -4,22 +4,20 @@ from typing import Any, List, Sequence
 
 import aiofiles
 from asyncpg import Record
-from telegram import Document, File, InputFile
+from telegram import Document, File, InputFile, PhotoSize
 from telegram._utils.files import parse_file_input
 
-from src.core.database import DBPool
 from src.core.settings import BASE_DIR
 from src.dto.base import BaseDTO
 from src.dto.models import Image
 
 
 class ImageDTO(BaseDTO):
-    def __init__(self, db: DBPool, *args, **kwargs):
-        super().__init__(db, *args, **kwargs)
+    _claim_id: int
 
     def get_attachment_path(self, from_root: bool = False):
         _root = BASE_DIR if from_root else ""
-        return os.path.join(_root, "attachments", f"claim-{self.claim_id}")
+        return os.path.join(_root, "attachments", f"claim-{self._claim_id}")
 
     async def attach_images(
         self, claim_id: int
@@ -45,8 +43,10 @@ class ImageDTO(BaseDTO):
 
         return _img_files
 
-    async def save_images(self, claim_id: int, images: Sequence[Document]):
-        self.claim_id = claim_id
+    async def save_images(
+        self, claim_id: int, images: Sequence[Document | PhotoSize]
+    ):
+        self._claim_id = claim_id
         _path = self.get_attachment_path()
         os.makedirs(_path, exist_ok=True)
         for image in images:

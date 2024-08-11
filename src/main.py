@@ -7,6 +7,7 @@ from telegram.ext import Application
 from src.core.database import DBPool
 from src.core.logger import set_default_params_log
 from src.core.settings import local_app, settings
+from src.core.transliterate import load_strings
 from src.core.updates import ALL_ALLOWED_TYPES
 from src.handlers.registry import registration_handlers
 from src.keyboards.default_handlers import set_default_commands
@@ -29,6 +30,7 @@ async def post_init(_application: Application) -> None:
             ],
         )
 
+    await load_strings()
     await init_templates()
     _application.bot_data["database"] = await DBPool().init_db()
     await set_default_commands(_application=_application)

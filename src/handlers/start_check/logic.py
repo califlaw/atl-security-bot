@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 from src.core.settings import settings
 from src.core.templates import render_template
+from src.core.transliterate import R
 from src.dto.claim import ClaimDTO
 from src.dto.models import Claim
 from src.handlers.enums import TemplateFiles
@@ -19,8 +20,8 @@ async def start_manage_check_callback(
         return
 
     button_list = [
-        InlineKeyboardButton("Подтвердить жалобу", callback_data="resolved"),
-        InlineKeyboardButton("Отменить жалобу", callback_data="declined"),
+        InlineKeyboardButton(R.string.resolve_claim, callback_data="resolved"),
+        InlineKeyboardButton(R.string.decline_claim, callback_data="declined"),
     ]
 
     claim: Claim = await ClaimDTO(
