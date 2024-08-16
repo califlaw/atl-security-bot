@@ -8,5 +8,7 @@
   "ask_claim_platform": "What is platform? (lalafo.kg, instagram, etc...)",
   "skip_add_images": "Skip step off upload images or videos",
   "attach_images": "Pls, attach images",
-  "thx_finish_claim": "Thanks for yor attention in cyber-bot, our team already work on your claim"
+  "comment_decision": "Write your comment decision above",
+  "thx_finish_claim": "Thanks for yor attention in cyber-bot, our team already work on your claim",
+  "thx_decision_claim": "Thanks for decision claim!"
 }

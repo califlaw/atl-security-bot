@@ -7,7 +7,6 @@ from telegram.ext import (
     CommandHandler,
     ConversationHandler,
     MessageHandler,
-    filters,
 )
 
 from . import *
@@ -67,10 +66,9 @@ def registration_handlers(application: Application) -> None:
             for (state, klass) in _store_phone_handlers.items()
         },
         fallbacks=[
-            # MessageHandler(
-            #     filters.PHOTO | filters.VIDEO,
-            #     ExitFallbackPhoneConvHandler.logic,
-            # )
+            MessageHandler(
+                filters=None, callback=ExitFallbackPhoneConvHandler.logic
+            )
         ],
         name="conversation_phone",
         persistent=False,
@@ -83,6 +81,9 @@ def registration_handlers(application: Application) -> None:
     start_check_claim_handler = CommandHandler(
         StartCheckHandler.command, StartCheckHandler.logic
     )
+    decision_claim_cb_handler = CallbackQueryHandler(
+        DecisionClaimHandler.logic
+    )
     stat_total_handler = CommandHandler(
         TotalHandler.command, TotalHandler.logic
     )
@@ -92,6 +93,7 @@ def registration_handlers(application: Application) -> None:
             conversation_phone_handler,
             conversation_url_handler,
             start_check_claim_handler,
+            decision_claim_cb_handler,
             stat_total_handler,
             start_handler,
             help_handler,

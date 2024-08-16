@@ -12,5 +12,5 @@ from .complain.klass import (
 )
 from .help.klass import HelpHandler
 from .start.klass import StartHandler
-from .start_check.klass import StartCheckHandler
+from .start_check.klass import DecisionClaimHandler, StartCheckHandler
 from .total.klass import TotalHandler

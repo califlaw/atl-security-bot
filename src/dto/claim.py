@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from typing import Dict, Sequence
+from typing import Dict
 from uuid import UUID
 
-from telegram import Document, User
+from telegram import User
 
 from src.core.normalizer import NormalizePhoneNumber
 from src.dto.author import AuthorDTO
@@ -82,6 +82,8 @@ class ClaimDTO(BaseDTO):
         )
 
     async def set_status_claim(self, status: StatusEnum):
+        assert self._id is not None, "Attribute _id is required, missed value!"
+
         if status not in StatusEnum._value2member_map_:  # noqa
             raise KeyError(f"{status} not included key in StatusEnum")
 
@@ -107,17 +109,19 @@ class ClaimDTO(BaseDTO):
         return claim
 
     async def resolve_claim(
-        self, claim_id: int, decision: str, comment: str | None = None
+        self, claim_id: int, decision: str, status: StatusEnum, comment: str | None = None
     ):
         self._id = claim_id
         await self.db.execute_query(
             """
-            update claims set comment = %(comment)s, 
-            decision = %(decision)s where id = %(id)s
+            update claims set 
+                comment = %(comment)s, 
+                decision = %(decision)s 
+            where id = %(id)s
             """,
             params={"id": claim_id, "decision": decision, "comment": comment},
         )
-        await self.set_status_claim(status=StatusEnum.resolved)
+        await self.set_status_claim(status=status)
 
     async def statistic_claims(self):
         result = {}

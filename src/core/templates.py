@@ -1,5 +1,5 @@
 import os
-from typing import Dict, LiteralString
+from typing import Dict, LiteralString, Type
 
 import aiofiles
 import structlog
@@ -7,6 +7,7 @@ from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
 from src.core.settings import BASE_DIR
+from src.dto.models import BaseRecord
 from src.handlers.enums import TemplateFiles
 
 TEMPLATES: Dict = {}
@@ -29,12 +30,17 @@ async def init_templates() -> None:
             await _read_template(os.path.join(root, _template))
 
 
-def render_template(name: str, mapping: dict | None = None) -> str:
+def render_template(
+    name: str, mapping: Type[BaseRecord] | dict | None = None
+) -> str:
     if name not in TemplateFiles._value2member_map_:  # noqa
         raise FileNotFoundError(f"Template {name} not found")
 
     if not isinstance(mapping, dict):
-        mapping = {}
+        try:
+            mapping = dict(mapping)  # noqa
+        except Exception:
+            mapping = {}
 
     _t: str = TEMPLATES.get(name + ".md")
     return escape_markdown(_t.format_map(mapping), version=2, entity_type=None)

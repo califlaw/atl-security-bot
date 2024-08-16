@@ -28,7 +28,7 @@ class ImageDTO(BaseDTO):
             params={"claim_id": claim_id},
             record=Image,
         )
-        for image in images:  # type: Image
+        for image in images or []:  # type: Image
             _, file_name = os.path.split(image.image_path)
             _path = self.get_attachment_path(from_root=True)
             async with aiofiles.open(
@@ -54,11 +54,9 @@ class ImageDTO(BaseDTO):
             images = [images]  # strong case to list items
 
         for image in images:
-            if (
-                isinstance(image, PhotoSize)
-                and image.height
-                <= settings.getint("DEFAULT", "minHeightImage")
-            ):
+            if isinstance(
+                image, PhotoSize
+            ) and image.height <= settings.getint("DEFAULT", "minHeightImage"):
                 break
 
             img_path = os.path.join(
