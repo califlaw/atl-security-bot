@@ -75,18 +75,21 @@ class DBPool:
         async with self._pool.acquire() as conn:  # type: asyncpg.Connection
             try:
                 if "insert" in _query or "update" in _query:
-                    await conn.execute(_query, *positional_args)
+                    results: List[asyncpg.Record] | None = await conn.fetchrow(
+                        _query, *positional_args, record_class=record
+                    )
                 else:
                     results: List[asyncpg.Record] | None = await conn.fetch(
                         _query,
                         *positional_args,
                         record_class=record,
                     )
-                    if len(results) == 1:
-                        # yep, will return extracted object of type: Record
-                        return results[0]
-                    elif not results:
-                        return None
-                    return results
+
+                if not results:
+                    return None
+                elif len(results) == 1:
+                    # yep, will return extracted object of type: Record
+                    return results[0]
+                return results
             finally:
                 await self._pool.release(conn)

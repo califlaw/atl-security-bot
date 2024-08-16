@@ -3,6 +3,7 @@ jsonLog = true
 loggingLevel = INFO
 sentryDsn =
 environment = dev
+minHeightImage = 400
 
 [bot]
 token =

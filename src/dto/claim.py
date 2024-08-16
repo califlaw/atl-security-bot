@@ -30,14 +30,15 @@ class ClaimDTO(BaseDTO):
         self,
         author: User,
         payload: Dict,
-        images: Sequence[Document] | None = None,
     ) -> Claim:
         _key_phone = "phone"
-        payload["link"] = None
-        payload["phone"] = None
         _strong_field: str = (
             _key_phone if _key_phone in payload.keys() else "link"
         )
+        if _strong_field != _key_phone:
+            payload[_key_phone] = None
+        else:
+            payload["link"] = None
 
         is_missed_fields, _missed_fields = await self.check_missed_payload(
             required_fields=["type", _strong_field],
@@ -54,7 +55,7 @@ class ClaimDTO(BaseDTO):
         if (phone := payload.get(_key_phone)) and _strong_field == _key_phone:
             payload[_key_phone] = normalizer.normalize(phone=phone, as_db=True)
 
-        claim: Claim = await self.db.execute_query(  # noqa
+        return await self.db.execute_query(  # noqa
             """
             insert into claims (
                 type, author, decision, phone, link, status, platform
@@ -62,15 +63,11 @@ class ClaimDTO(BaseDTO):
             values (
                 %(type)s::incidentenum, %(author)s, null, 
                 %(phone)s, %(link)s, 'accepted'::statusenum, null
-            ) returning id;
+            ) returning *;
             """,
             params=payload,
             record=Claim,
         )
-        if images:
-            await self._image.save_images(claim_id=claim.id, images=images)
-
-        return claim
 
     async def get_detail_claim(
         self, status: StatusEnum = StatusEnum.accepted
@@ -80,7 +77,7 @@ class ClaimDTO(BaseDTO):
             select * from claims where status = %(status)s 
             order by created_at limit 1
             """,
-            params={'status': status.value},
+            params={"status": status.value},
             record=Claim,
         )
 
@@ -90,7 +87,7 @@ class ClaimDTO(BaseDTO):
 
         await self.db.execute_query(
             """
-            update claims set status = %(status)s where id = %(id)
+            update claims set status = %(status)s where id = %(id)s
             """,
             params={"id": self._id, "status": status.value},
         )
@@ -98,7 +95,7 @@ class ClaimDTO(BaseDTO):
     async def set_platform_claim(self, platform: str):
         await self.db.execute_query(
             """
-            update claims set platform = %(platform)s where id = %(id)
+            update claims set platform = %(platform)s where id = %(id)s
             """,
             params={"id": self._id, "platform": platform},
         )

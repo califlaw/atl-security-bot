@@ -1,7 +1,7 @@
-from typing import Sequence
+from typing import Tuple
 
 import structlog
-from telegram import InlineKeyboardButton, PhotoSize, Update
+from telegram import Document, InlineKeyboardButton, PhotoSize, Update
 from telegram.ext import ContextTypes
 
 from src.core.logger import log_event
@@ -42,7 +42,6 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     claim = await ClaimDTO(db=context.bot_data["database"]).initiation_claim(
         author=update.effective_user,
         payload=payload,
-        images=None,
     )
 
     context.user_data["claim"] = claim.id
@@ -88,7 +87,9 @@ async def complain_parse_platform_ask_photos_callback(
 async def complain_parse_photos_or_stop_callback(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    images: Sequence[PhotoSize] = update.message.photo
+    images: Tuple[PhotoSize, ...] = update.message.photo
+    if not images:
+        images: Document = update.message.document
 
     try:
         claim_id = extract_claim_id(context=context)

@@ -44,7 +44,9 @@ class ParsePlatformAskPhotosHandler(BaseHandlerKlass):
 class ParsePhotosOrStopConvHandler(BaseHandlerKlass):
     command: str = ""
     state: HandlerStateEnum = HandlerStateEnum.AWAIT_PHOTOS
-    filters: List[Type[MessageFilter]] | None = [filters.PHOTO | filters.VIDEO]
+    filters: Type[MessageFilter] | None = (
+        filters.PHOTO | filters.VIDEO | filters.Document.IMAGE
+    )
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
         Coroutine[Any, Any, int],

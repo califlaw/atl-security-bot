@@ -33,7 +33,7 @@ class AuthorDTO(BaseDTO):
                 """
                 insert into author (id, full_name, tg_user_id) 
                 values (gen_random_uuid(), %(full_name)s, %(tg_id)s) 
-                returning id;
+                returning *;
                 """,
                 params={"tg_id": author.name, "full_name": author.full_name},
                 record=Author,

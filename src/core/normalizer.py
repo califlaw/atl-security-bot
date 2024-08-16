@@ -1,4 +1,5 @@
 import phonenumbers
+from phonenumbers import NumberParseException
 
 
 class NormalizePhoneNumber:
@@ -9,15 +10,18 @@ class NormalizePhoneNumber:
                 number=phone, region=None, _check_region=False
             )
             if not phonenumbers.is_valid_number(_instance):
-                raise phonenumbers.NumberParseException
-        except phonenumbers.NumberParseException as e:
+                raise NumberParseException(
+                    error_type=NumberParseException.INVALID_COUNTRY_CODE,
+                    msg="Invalid phone number",
+                )
+        except NumberParseException as e:
             raise ValueError(e)
 
         return _instance
 
-    def try_is_phone(self, phone: str) -> phonenumbers.PhoneNumber | None:
+    def try_is_phone(self, phone: str) -> str | None:
         try:
-            return self._parse(phone=phone)
+            return self.normalize(phone=phone)
         except ValueError:
             return None
 

@@ -44,7 +44,7 @@ def registration_handlers(application: Application) -> None:
             for (state, klass) in _store_link_handlers.items()
         },
         fallbacks=[
-            MessageHandler(filters.PHOTO | filters.VIDEO, lambda: None)
+            # MessageHandler(filters.PHOTO | filters.VIDEO, lambda: None)
         ],
         name="conversation_link",
         persistent=False,
@@ -67,10 +67,10 @@ def registration_handlers(application: Application) -> None:
             for (state, klass) in _store_phone_handlers.items()
         },
         fallbacks=[
-            MessageHandler(
-                filters.PHOTO | filters.VIDEO,
-                ExitFallbackPhoneConvHandler.logic,
-            )
+            # MessageHandler(
+            #     filters.PHOTO | filters.VIDEO,
+            #     ExitFallbackPhoneConvHandler.logic,
+            # )
         ],
         name="conversation_phone",
         persistent=False,
