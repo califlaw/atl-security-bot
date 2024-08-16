@@ -66,8 +66,8 @@ def registration_handlers(application: Application) -> None:
             for (state, klass) in _store_phone_handlers.items()
         },
         fallbacks=[
-            MessageHandler(
-                filters=None, callback=ExitFallbackPhoneConvHandler.logic
+            CallbackQueryHandler(
+                callback=ExitFallbackPhoneConvHandler.logic
             )
         ],
         name="conversation_phone",
@@ -81,9 +81,7 @@ def registration_handlers(application: Application) -> None:
     start_check_claim_handler = CommandHandler(
         StartCheckHandler.command, StartCheckHandler.logic
     )
-    decision_claim_cb_handler = CallbackQueryHandler(
-        DecisionClaimHandler.logic
-    )
+    buttons_cb_handler = CallbackQueryHandler(ButtonCallbacksHandler.logic)
     stat_total_handler = CommandHandler(
         TotalHandler.command, TotalHandler.logic
     )
@@ -93,7 +91,7 @@ def registration_handlers(application: Application) -> None:
             conversation_phone_handler,
             conversation_url_handler,
             start_check_claim_handler,
-            decision_claim_cb_handler,
+            buttons_cb_handler,
             stat_total_handler,
             start_handler,
             help_handler,

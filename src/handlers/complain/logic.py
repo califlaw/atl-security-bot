@@ -9,6 +9,7 @@ from src.core.transliterate import R
 from src.core.utils import get_link
 from src.dto.claim import ClaimDTO, normalizer
 from src.dto.image import ImageDTO
+from src.handlers.button_cb.enums import CallbackStateEnum
 from src.handlers.complain.enums import HandlerStateEnum
 from src.handlers.exceptions import ExtractClaimIDError
 from src.handlers.helpers import extract_claim_id
@@ -38,6 +39,10 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     else:
         payload["type"] = "link"
         payload["link"] = get_link(url=source_claim)
+
+    if not payload.get('phone') and not payload.get('link'):
+        await update.message.reply_text(R.string.incorrect_phone)
+        return HandlerStateEnum.AWAIT_PHONE_OR_LINK.value
 
     claim = await ClaimDTO(db=context.bot_data["database"]).initiation_claim(
         author=update.effective_user,
@@ -78,7 +83,7 @@ async def complain_parse_platform_ask_photos_callback(
 
     await update.message.reply_text(
         text=R.string.attach_images,
-        reply_markup=make_reply_markup(button_list=button_list, colls=1),
+        reply_markup=make_reply_markup(button_list=button_list),
     )
 
     return HandlerStateEnum.AWAIT_PHOTOS.value
@@ -108,8 +113,8 @@ async def complain_parse_photos_or_stop_callback(
 
 async def fallback_exit_conv_callback(update: Update, _) -> int:
     query = update.callback_query
-    is_answer = await query.answer()
-    if not is_answer or query.data == "skip_photos":
+    await query.answer()
+    if query.data == CallbackStateEnum.skip_photos.value:
         return HandlerStateEnum.STOP_CONVERSATION.value
 
     await update.message.reply_text(R.string.thx_finish_claim)

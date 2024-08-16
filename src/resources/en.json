@@ -1,10 +1,12 @@
 {
-  "add_claim": "Add claim",
+  "add_claim_link": "Add claim of link",
+  "add_claim_phone": "Add claim of phone",
   "decline_claim": "Decline claim",
   "resolve_claim": "Resolve claim",
   "ask_help_group": "Ask help in group",
   "enter_phone_number": "Enter phone number",
   "join_community": "Join to oup chat-community",
+  "incorrect_phone": "Incorrect wrote phone number, repeat again",
   "ask_claim_platform": "What is platform? (lalafo.kg, instagram, etc...)",
   "skip_add_images": "Skip step off upload images or videos",
   "attach_images": "Pls, attach images",

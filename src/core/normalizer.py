@@ -40,7 +40,7 @@ class NormalizePhoneNumber:
         try:
             phone_obj = self._parse(phone=phone)
         except ValueError:
-            return "Unknown phone number"
+            raise
 
         _format = (
             phonenumbers.PhoneNumberFormat.E164

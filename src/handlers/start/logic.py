@@ -1,6 +1,5 @@
 import structlog
 from telegram import InlineKeyboardButton, Update
-from telegram.ext import ContextTypes
 
 from src.core.settings import settings
 from src.core.templates import render_template
@@ -12,9 +11,7 @@ from src.keyboards.menu import make_reply_markup
 logger = structlog.stdlib.get_logger("StartHandler.logic")
 
 
-async def start_callback(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
+async def start_callback(update: Update, _) -> None:
     button_list = [
         InlineKeyboardButton(
             R.string.join_community,
