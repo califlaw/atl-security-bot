@@ -5,17 +5,17 @@ from src.core.templates import render_template
 from src.core.transliterate import R
 from src.dto.claim import ClaimDTO
 from src.dto.models import Claim
-from src.handlers.enums import TemplateFiles, StatusEnum
+from src.handlers.enums import StatusEnum, TemplateFiles
 from src.handlers.helpers import extract_claim_id
 from src.handlers.mode import DEFAULT_PARSE_MODE
 from src.keyboards.menu import make_reply_markup
 
 
 def _decision_msg(user: User) -> str:
-    _full_name = ' '.join([user.first_name or '', user.last_name or '']).strip()
-    return (
-        f"Заявка решена {user.username} ({_full_name})"
-    )
+    _full_name = " ".join(
+        [user.first_name or "", user.last_name or ""]
+    ).strip()
+    return f"Заявка решена {user.username} ({_full_name})"
 
 
 async def start_manage_check_callback(
@@ -36,7 +36,6 @@ async def start_manage_check_callback(
         parse_mode=DEFAULT_PARSE_MODE,
         reply_markup=make_reply_markup(button_list=button_list),
     )
-    # await update.effective_chat.send_message(text=R.string.comment_decision)
 
 
 async def decision_claim_button_callback(
@@ -59,6 +58,6 @@ async def decision_claim_button_callback(
     await claim_obj.resolve_claim(
         claim_id=claim_id,
         decision=_decision_msg(update.effective_user),
-        status=status
+        status=status,
     )
     await update.effective_chat.send_message(text=R.string.thx_decision_claim)

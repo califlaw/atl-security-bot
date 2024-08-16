@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Dict
 from uuid import UUID
 
@@ -15,7 +14,6 @@ from src.handlers.enums import StatusEnum
 normalizer = NormalizePhoneNumber()
 
 
-@dataclass
 class ClaimDTO(BaseDTO):
     _id: int
 
@@ -109,17 +107,16 @@ class ClaimDTO(BaseDTO):
         return claim
 
     async def resolve_claim(
-        self, claim_id: int, decision: str, status: StatusEnum, comment: str | None = None
+        self, claim_id: int, decision: str, status: StatusEnum
     ):
         self._id = claim_id
         await self.db.execute_query(
             """
             update claims set 
-                comment = %(comment)s, 
                 decision = %(decision)s 
             where id = %(id)s
             """,
-            params={"id": claim_id, "decision": decision, "comment": comment},
+            params={"id": claim_id, "decision": decision},
         )
         await self.set_status_claim(status=status)
 
@@ -133,13 +130,27 @@ class ClaimDTO(BaseDTO):
             from claims;
             """
         )
+        _platforms_records = await self.db.execute_query(
+            """
+            SELECT c2.platform
+            FROM claims c1
+            JOIN claims c2 ON c1.id <> c2.id
+            WHERE similarity(c1.platform, c2.platform) >= 0.8
+            GROUP BY 
+                c2.platform, c1.platform, similarity(c1.platform, c2.platform);
+            """
+        )
         platforms = await self.db.execute_query(
-            """
-            select distinct 
-                count(id) as total_claim, 
-                count(id) filter (where status = 'resolved') as resolved_claims 
-            from claims;
-            """
+            " UNION ALL ".join(  # noqa
+                f"""
+                    SELECT '{record['platform']}' as _name, count(*) as _counter
+                    FROM claims
+                    WHERE 
+                        similarity(platform, '{record['platform']}') > 0.7 and 
+                        status = 'resolved'
+                    """
+                for record in _platforms_records
+            )
         )
 
         result.update(totals)

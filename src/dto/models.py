@@ -42,7 +42,6 @@ class Claim(BaseRecord):
     status: StatusEnum
     created_at: datetime
     type: Literal["phone", "url"]
-    comment: str
     decision: str
     link: str | None
     phone: str | None

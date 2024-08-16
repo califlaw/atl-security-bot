@@ -1,4 +1,4 @@
-create extension pg_trgm;
+create extension if not exists pg_trgm;
 create type IncidentEnum as enum ('link', 'phone');
 create type StatusEnum as enum ('accepted', 'pending', 'review', 'resolved', 'declined');
 
@@ -19,7 +19,6 @@ create table claims
     platform   varchar(255) not null,
     -- id from TG as user_id --
     author     uuid         not null references author deferrable initially deferred,
-    comment    varchar(255) default '',
     -- could content text with links to sources of another sites --
     decision   text,
 
