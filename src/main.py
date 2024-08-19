@@ -37,7 +37,8 @@ async def post_init(_application: Application) -> None:
 
 
 async def post_shutdown(_application: Application) -> None:
-    await _application.bot_data.get("database").close()
+    if _db_connector := _application.bot_data.get("database"):
+        await _db_connector.close()
 
 
 def main():
