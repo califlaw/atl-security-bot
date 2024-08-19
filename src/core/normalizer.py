@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict, Type
+from typing import Any, Dict, Type
 
 import phonenumbers
 from phonenumbers import NumberParseException
@@ -57,9 +57,9 @@ class NormalizePhoneNumber:
         return phonenumbers.format_number(phone_obj, num_format=_format)
 
 
-def type_normalizer(payload: Dict | Type[BaseRecord]):
+def type_normalizer(payload: Dict | Type[BaseRecord]) -> Dict:
     result = {}
-    for key, value in payload.items():
+    for key, value in payload.items():  # type: str, Any
         if isinstance(value, datetime.datetime):
             result[key] = value.strftime(
                 settings.get("DEFAULT", "dateTimeFormat")

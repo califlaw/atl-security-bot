@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from src.core.normalizer import NormalizePhoneNumber, type_normalizer
+from src.core.normalizer import NormalizePhoneNumber
 from src.core.templates import render_template
 from src.core.transliterate import R
 from src.core.utils import ChatActionContext
@@ -31,9 +31,9 @@ async def check_number_callback(
         )
 
     await update.effective_chat.send_message(
-        text=render_template(
-            TemplateFiles.check_claim, mapping=type_normalizer(existed_claim)
-        ),
+        text=render_template(TemplateFiles.check_claim, mapping=existed_claim),
         parse_mode=DEFAULT_PARSE_MODE,
     )
-    await update.effective_chat.send_message(text=R.string.thx_security_kg_alga)
+    await update.effective_chat.send_message(
+        text=R.string.thx_security_kg_alga
+    )

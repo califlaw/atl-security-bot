@@ -6,6 +6,7 @@ import structlog
 from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
+from src.core.normalizer import type_normalizer
 from src.core.settings import BASE_DIR
 from src.dto.models import BaseRecord
 from src.handlers.enums import TemplateFiles
@@ -36,11 +37,9 @@ def render_template(
     if name not in TemplateFiles._value2member_map_:  # noqa
         raise FileNotFoundError(f"Template {name} not found")
 
-    if not isinstance(mapping, dict):
-        try:
-            mapping = dict(mapping)  # noqa
-        except Exception:
-            mapping = {}
-
     _t: str = TEMPLATES.get(name + ".md")
-    return escape_markdown(_t.format_map(mapping), version=2, entity_type=None)
+    if not mapping:
+        mapping = {}
+    text_template = _t.format_map(type_normalizer(mapping))
+
+    return escape_markdown(text_template, version=2, entity_type=None)
