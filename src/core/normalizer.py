@@ -2,6 +2,7 @@ import datetime
 from typing import Any, Dict, Type
 
 import phonenumbers
+import pytz
 from phonenumbers import NumberParseException
 
 from src.core.settings import settings
@@ -61,9 +62,11 @@ def type_normalizer(payload: Dict | Type[BaseRecord]) -> Dict:
     result = {}
     for key, value in payload.items():  # type: str, Any
         if isinstance(value, datetime.datetime):
-            result[key] = value.strftime(
-                settings.get("DEFAULT", "dateTimeFormat")
-            )
+            utc_timezone = pytz.utc
+            value = utc_timezone.localize(value)
+            result[key] = value.astimezone(
+                tz=pytz.timezone(settings.get("DEFAULT", "timezone"))
+            ).strftime(settings.get("DEFAULT", "dateTimeFormat"))
         elif isinstance(value, datetime.date):
             result[key] = value.strftime(settings.get("DEFAULT", "dateFormat"))
         elif isinstance(value, bool):

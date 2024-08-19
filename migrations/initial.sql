@@ -12,7 +12,7 @@ create table author
 create table claims
 (
     id         serial primary key,
-    created_at timestamp    default now(),
+    created_at timestamptz    default now(),
     type       IncidentEnum not null,
     status     StatusEnum   not null,
     -- platform claim, like instagram / lalafo / disel --
