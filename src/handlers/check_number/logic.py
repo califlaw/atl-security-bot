@@ -36,3 +36,4 @@ async def check_number_callback(
         ),
         parse_mode=DEFAULT_PARSE_MODE,
     )
+    await update.effective_chat.send_message(text=R.string.thx_security_kg_alga)
