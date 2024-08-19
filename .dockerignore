@@ -23,6 +23,7 @@ build/
 develop-eggs/
 dist/
 downloads/
+attachments/
 eggs/
 lib/
 lib64/

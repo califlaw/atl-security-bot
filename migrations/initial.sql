@@ -12,7 +12,7 @@ create table author
 create table claims
 (
     id         serial primary key,
-    created_at timestamptz    default now(),
+    created_at timestamptz default now(),
     type       IncidentEnum not null,
     status     StatusEnum   not null,
     -- platform claim, like instagram / lalafo / disel --
@@ -34,7 +34,7 @@ create index ix_phone_link_composed on claims (phone, link);
 
 create table image
 (
-    id          uuid primary key,
+    id       uuid primary key,
     claim_id int references claims deferrable initially deferred,
-    image       varchar(255) -- path to folder --
+    image    varchar(255) -- path to folder --
 );
