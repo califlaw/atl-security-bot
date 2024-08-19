@@ -11,44 +11,26 @@ from telegram.ext import (
 
 from . import *
 
-_store_link_handlers = defaultdict()
-_store_phone_handlers = defaultdict()
+_store_claim_handlers = defaultdict()
+
+_check_link_handlers = defaultdict()
+_check_phone_handlers = defaultdict()
 
 for _phone_hdl in [
     ParsePhoneOrLinkWithAskPlatformHandler,
     ParsePlatformAskPhotosHandler,
     ParsePhotosOrStopConvHandler,
 ]:
-    _store_phone_handlers[_phone_hdl.state] = _phone_hdl
+    _store_claim_handlers[_phone_hdl.state] = _phone_hdl
 
-for _link_hdl in []:
-    _store_link_handlers[_link_hdl.state] = _link_hdl
+for _phone_check_hdl in [ParseCheckPhoneHandler]:
+    _check_phone_handlers[_phone_check_hdl.state] = _phone_check_hdl
+
+for _link_check_hdl in []:
+    _check_link_handlers[_link_check_hdl.state] = _link_check_hdl
 
 
 def registration_handlers(application: Application) -> None:
-    conversation_url_handler = ConversationHandler(
-        entry_points=[
-            CommandHandler(
-                StartCheckLinkHandler.command, StartCheckLinkHandler.logic
-            )
-        ],
-        states={
-            state.value: [
-                CallbackQueryHandler(callback=klass.logic)
-                if klass.is_query and not klass.filters
-                else MessageHandler(
-                    filters=klass.filters, callback=klass.logic
-                )
-            ]  # type: klass: Type[BaseHandlerKlass]
-            for (state, klass) in _store_link_handlers.items()
-        },
-        fallbacks=[
-            # MessageHandler(filters.PHOTO | filters.VIDEO, lambda: None)
-        ],
-        name="conversation_link",
-        persistent=False,
-    )
-
     conversation_phone_handler = ConversationHandler(
         entry_points=[
             CommandHandler(
@@ -63,14 +45,35 @@ def registration_handlers(application: Application) -> None:
                     filters=klass.filters, callback=klass.logic
                 )
             ]  # type: klass: Type[BaseHandlerKlass]
-            for (state, klass) in _store_phone_handlers.items()
+            for (state, klass) in _store_claim_handlers.items()
         },
         fallbacks=[
-            CallbackQueryHandler(
-                callback=ExitFallbackPhoneConvHandler.logic
-            )
+            CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
         name="conversation_phone",
+        persistent=False,
+    )
+
+    conversation_phone_check_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler(
+                CheckNumberHandler.command, CheckNumberHandler.logic
+            )
+        ],
+        states={
+            state.value: [
+                CallbackQueryHandler(callback=klass.logic)
+                if klass.is_query and not klass.filters
+                else MessageHandler(
+                    filters=klass.filters, callback=klass.logic
+                )
+            ]  # type: klass: Type[BaseHandlerKlass]
+            for (state, klass) in _check_phone_handlers.items()
+        },
+        fallbacks=[
+            CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
+        ],
+        name="conversation_check_phone",
         persistent=False,
     )
 
@@ -88,8 +91,8 @@ def registration_handlers(application: Application) -> None:
 
     application.add_handlers(
         [
+            conversation_phone_check_handler,
             conversation_phone_handler,
-            conversation_url_handler,
             start_check_claim_handler,
             buttons_cb_handler,
             stat_total_handler,

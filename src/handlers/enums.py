@@ -13,5 +13,5 @@ class TemplateFiles(StrEnum):
     help = "help"
     start = "start"
     total = "total"
-    init_claim = "init_claim"
     start_check = "start_check"
+    check_claim = "check_claim"

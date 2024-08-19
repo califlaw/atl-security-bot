@@ -1,5 +1,12 @@
+import datetime
+from typing import Dict, Type
+
 import phonenumbers
 from phonenumbers import NumberParseException
+
+from src.core.settings import settings
+from src.core.transliterate import R
+from src.dto.models import BaseRecord
 
 
 class NormalizePhoneNumber:
@@ -48,3 +55,20 @@ class NormalizePhoneNumber:
             else phonenumbers.PhoneNumberFormat.NATIONAL
         )
         return phonenumbers.format_number(phone_obj, num_format=_format)
+
+
+def type_normalizer(payload: Dict | Type[BaseRecord]):
+    result = {}
+    for key, value in payload.items():
+        if isinstance(value, datetime.datetime):
+            result[key] = value.strftime(
+                settings.get("DEFAULT", "dateTimeFormat")
+            )
+        elif isinstance(value, datetime.date):
+            result[key] = value.strftime(settings.get("DEFAULT", "dateFormat"))
+        elif isinstance(value, bool):
+            result[key] = R.string.yes if value else R.string.no
+        else:
+            result[key] = value
+
+    return result

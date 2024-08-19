@@ -3,7 +3,7 @@ from .base import BaseHandlerKlass
 # import impl klass commands
 from .button_cb.klass import ButtonCallbacksHandler
 from .check_link.klass import StartCheckLinkHandler
-from .check_number.klass import CheckNumberHandler
+from .check_number.klass import CheckNumberHandler, ParseCheckPhoneHandler
 from .complain.klass import (
     ExitFallbackPhoneConvHandler,
     ParsePhoneOrLinkWithAskPlatformHandler,

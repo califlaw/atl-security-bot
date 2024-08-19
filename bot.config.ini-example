@@ -4,6 +4,8 @@ loggingLevel = INFO
 sentryDsn =
 environment = dev
 minHeightImage = 400
+dateFormat = %%d-%%m-%%Y
+dateTimeFormat = %%d-%%m-%%Y %%H:%%M
 
 [bot]
 token =

@@ -6,7 +6,8 @@ from telegram.ext import ContextTypes
 
 from src.core.logger import log_event
 from src.core.transliterate import R
-from src.core.utils import get_link
+from src.core.utils import create_bg_task, get_link
+from src.core.virustotal import VirusTotal
 from src.dto.claim import ClaimDTO, normalizer
 from src.dto.image import ImageDTO
 from src.handlers.button_cb.enums import CallbackStateEnum
@@ -19,7 +20,7 @@ logger = structlog.stdlib.get_logger("handlers.complain")
 
 
 async def complain_phone_callback(update: Update, _) -> int:
-    await update.effective_chat.send_message(R.string.enter_phone_number)
+    await update.effective_chat.send_message(R.string.enter_phone_or_link)
     return HandlerStateEnum.AWAIT_PHONE_OR_LINK.value
 
 
@@ -31,6 +32,7 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     await log_event(
         logger, "Fetch source claim", payload={"msg": source_claim}
     )
+    claim_obj = ClaimDTO(db=context.bot_data["database"])
 
     phone: str | None = normalizer.try_is_phone(phone=source_claim)
     if phone:
@@ -40,16 +42,23 @@ async def complain_parse_phone_or_link_ask_platform_callback(
         payload["type"] = "link"
         payload["link"] = get_link(url=source_claim)
 
-    if not payload.get('phone') and not payload.get('link'):
+    if not payload.get("phone") and not payload.get("link"):
         await update.message.reply_text(R.string.incorrect_phone)
         return HandlerStateEnum.AWAIT_PHONE_OR_LINK.value
 
-    claim = await ClaimDTO(db=context.bot_data["database"]).initiation_claim(
+    claim = await claim_obj.initiation_claim(
         author=update.effective_user,
         payload=payload,
     )
 
     context.user_data["claim"] = claim.id
+    if url := payload.get("link"):  # type: str
+        vt = VirusTotal()
+        save_analyze = claim_obj.save_virustotal_analyze(claim_id=claim.id)
+        await create_bg_task(
+            vt.scan_url(url=url, wait_for_completion=False), save_analyze
+        )
+
     await update.message.reply_text(R.string.ask_claim_platform)
 
     return HandlerStateEnum.AWAIT_PLATFORM.value
@@ -117,5 +126,5 @@ async def fallback_exit_conv_callback(update: Update, _) -> int:
     if query.data == CallbackStateEnum.skip_photos.value:
         return HandlerStateEnum.STOP_CONVERSATION.value
 
-    await update.message.reply_text(R.string.thx_finish_claim)
+    await query.message.chat.send_message(R.string.thx_finish_claim)
     return HandlerStateEnum.STOP_CONVERSATION.value

@@ -120,6 +120,42 @@ class ClaimDTO(BaseDTO):
         )
         await self.set_status_claim(status=status)
 
+    async def check_existed_claim(self, phone: str):
+        return await self.db.execute_query(
+            """
+            WITH
+            unique_claim_fraud_cases AS (
+                SELECT EXISTS (SELECT 1
+                               FROM claims
+                               WHERE phone = %(phone)s 
+                                    and type = 'phone') AS exists),
+            latest_claim_date AS (SELECT MAX(created_at) AS created_at
+                                  FROM claims
+                                  WHERE phone = %(phone)s
+                                    and type = 'phone'),
+            claim_platform AS (SELECT platform
+                               FROM claims
+                               WHERE phone = %(phone)s
+                                 and type = 'phone'
+                               GROUP BY platform
+                               ORDER BY count(1) DESC
+                               LIMIT 1),
+            total_claims AS (SELECT count(1) AS total
+                             FROM claims
+                             WHERE phone = %(phone)s
+                               and type = 'phone')
+            SELECT ucf.exists     AS _existed_claim,
+                   lid.created_at AS _last_claim,
+                   fp.platform    AS _platform_claim,
+                   tc.total       AS _total_claims
+            FROM unique_claim_fraud_cases ucf
+                     CROSS JOIN latest_claim_date lid
+                     CROSS JOIN claim_platform fp
+                     CROSS JOIN total_claims tc;
+            """,
+            params={"phone": phone},
+        )
+
     async def statistic_claims(self):
         result = {}
         totals = await self.db.execute_query(
@@ -156,3 +192,6 @@ class ClaimDTO(BaseDTO):
         result.update(totals)
         result["platforms"] = platforms
         return result
+
+    async def save_virustotal_analyze(self, claim_id: int):
+        pass
