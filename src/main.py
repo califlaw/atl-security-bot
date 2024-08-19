@@ -10,8 +10,7 @@ from src.core.database import DBPool
 from src.core.logger import set_default_params_log
 from src.core.settings import local_app, settings
 from src.core.transliterate import load_strings
-from src.core.updater import UpdProcessorMiddleware
-from src.core.updates import ALL_ALLOWED_TYPES
+from src.core.updater import ALL_ALLOWED_TYPES, UpdProcessorMiddleware
 from src.handlers.registry import registration_handlers
 from src.keyboards.default_handlers import set_default_commands
 
