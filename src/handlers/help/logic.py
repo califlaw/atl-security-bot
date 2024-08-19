@@ -7,7 +7,6 @@ from src.core.templates import render_template
 from src.core.transliterate import R
 from src.core.utils import ChatActionContext
 from src.handlers.enums import TemplateFiles
-from src.handlers.mode import DEFAULT_PARSE_MODE
 from src.keyboards.menu import make_reply_markup
 
 logger = structlog.stdlib.get_logger("HelpHandler.logic")
@@ -29,6 +28,5 @@ async def help_callback(
     ):
         await update.effective_chat.send_message(
             text=render_template(TemplateFiles.help),
-            parse_mode=DEFAULT_PARSE_MODE,
             reply_markup=make_reply_markup(button_list=button_list),
         )

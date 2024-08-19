@@ -7,7 +7,6 @@ from src.dto.claim import ClaimDTO
 from src.dto.models import Claim
 from src.handlers.button_cb.enums import CallbackStateEnum
 from src.handlers.enums import TemplateFiles
-from src.handlers.mode import DEFAULT_PARSE_MODE
 from src.keyboards.menu import make_reply_markup
 
 
@@ -32,6 +31,5 @@ async def start_manage_check_callback(
 
     await update.effective_chat.send_message(
         text=render_template(TemplateFiles.start_check, mapping=claim),
-        parse_mode=DEFAULT_PARSE_MODE,
         reply_markup=make_reply_markup(button_list=button_list),
     )

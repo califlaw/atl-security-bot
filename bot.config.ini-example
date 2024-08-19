@@ -4,6 +4,7 @@ loggingLevel = INFO
 sentryDsn =
 environment = dev
 minHeightImage = 400
+timezone = Asia/Bishkek
 dateFormat = %%d-%%m-%%Y
 dateTimeFormat = %%d-%%m-%%Y %%H:%%M
 
@@ -12,6 +13,7 @@ token =
 operators =
 superGroupId =
 communityGroupLink =
+max_concurrent = 256
 
 [database]
 dsn = postgresql://user:password@localhost:5432/dbname

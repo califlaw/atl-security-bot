@@ -8,7 +8,6 @@ from src.core.utils import ChatActionContext
 from src.dto.claim import ClaimDTO
 from src.handlers.check_number.enums import HandleCheckPhoneEnum
 from src.handlers.enums import TemplateFiles
-from src.handlers.mode import DEFAULT_PARSE_MODE
 
 normalizer = NormalizePhoneNumber()
 
@@ -32,7 +31,6 @@ async def check_number_callback(
 
     await update.effective_chat.send_message(
         text=render_template(TemplateFiles.check_claim, mapping=existed_claim),
-        parse_mode=DEFAULT_PARSE_MODE,
     )
     await update.effective_chat.send_message(
         text=R.string.thx_security_kg_alga

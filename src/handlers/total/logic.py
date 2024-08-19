@@ -6,7 +6,6 @@ from src.core.logger import log_event
 from src.core.templates import render_template
 from src.dto.claim import ClaimDTO
 from src.handlers.enums import TemplateFiles
-from src.handlers.mode import DEFAULT_PARSE_MODE
 
 logger = structlog.stdlib.get_logger("TotalHandler.logic")
 
@@ -30,5 +29,4 @@ async def total_callback(
 
     await update.effective_chat.send_message(
         text=render_template(TemplateFiles.total, mapping=claim_statistics),
-        parse_mode=DEFAULT_PARSE_MODE,
     )
