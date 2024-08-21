@@ -9,6 +9,15 @@ from orjson import orjson
 from telegram import Bot
 from telegram.constants import ChatAction
 
+url_regex = (
+    r"^(https?|ftp)://"
+    r"([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}"
+    r"(:\d+)?"
+    r"(/[-a-zA-Z0-9@:%._+~#=]*)*"
+    r"(\?[;&a-zA-Z0-9%_.,~+=-]*)?"
+    r"(#[-a-zA-Z0-9_]*)?$"
+)
+
 
 def async_partial(f, *args):
     async def f2(*args2):
@@ -38,14 +47,7 @@ def serialize_orjson(content: Any) -> bytes:
 
 
 def get_link(url: str) -> str | None:
-    url_pattern = re.compile(
-        r"^(https?|ftp)://"
-        r"([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}"
-        r"(:\d+)?"
-        r"(/[-a-zA-Z0-9@:%._+~#=]*)*"
-        r"(\?[;&a-zA-Z0-9%_.,~+=-]*)?"
-        r"(#[-a-zA-Z0-9_]*)?$"
-    )
+    url_pattern = re.compile(pattern=url_regex)
     _pattern_search = re.match(url_pattern, url)
     if not _pattern_search:
         return None

@@ -8,6 +8,7 @@ from telegram.helpers import escape_markdown
 from src.core.logger import log_event
 from src.core.normalizer import type_normalizer
 from src.core.settings import BASE_DIR
+from src.core.transliterate import R
 from src.dto.models import BaseRecord
 from src.handlers.enums import TemplateFiles
 
@@ -38,8 +39,12 @@ def render_template(
         raise FileNotFoundError(f"Template {name} not found")
 
     _t: str = TEMPLATES.get(name + ".md")
-    if not mapping:
-        mapping = {}
-    text_template = _t.format_map(type_normalizer(mapping))
+
+    try:
+        if not mapping:
+            mapping = {}
+        text_template = _t.format_map(type_normalizer(mapping))
+    except KeyError:
+        text_template = R.string.error_template
 
     return escape_markdown(text_template, version=2, entity_type=None)

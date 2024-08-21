@@ -15,7 +15,7 @@ class CheckNumberHandler(BaseHandlerKlass):
     command: str = "checknumber"
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
-        Coroutine[Any, Any, None],
+        Coroutine[Any, Any, int],
     ] = start_check_phone_callback
 
 
@@ -24,5 +24,5 @@ class ParseCheckPhoneHandler(BaseHandlerKlass):
     state: HandleCheckPhoneEnum = HandleCheckPhoneEnum.AWAIT_PHONE
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
-        Coroutine[Any, Any, None],
+        Coroutine[Any, Any, int],
     ] = check_number_callback

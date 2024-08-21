@@ -193,5 +193,19 @@ class ClaimDTO(BaseDTO):
         result["platforms"] = platforms
         return result
 
+    async def check_existed_linked_claim(self, link: str):
+        return await self.db.execute_query(
+            """
+            select 
+                cm.id as id, cm.platform as platform, 
+                cm.link as link, m.type as type
+            from claims cm
+                     join malware m on cm.id = m.claim_id
+            where cm.link = %(link)s;
+            """,
+            params={"link": link},
+            record=Claim,
+        )
+
     async def save_virustotal_analyze(self, claim_id: int):
         pass

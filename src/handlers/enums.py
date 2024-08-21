@@ -14,4 +14,5 @@ class TemplateFiles(StrEnum):
     start = "start"
     total = "total"
     start_check = "start_check"
-    check_claim = "check_claim"
+    check_link_claim = "check_link_claim"
+    check_phone_claim = "check_phone_claim"

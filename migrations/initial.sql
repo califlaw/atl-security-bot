@@ -2,14 +2,16 @@ create extension if not exists pg_trgm;
 create type IncidentEnum as enum ('link', 'phone');
 create type StatusEnum as enum ('accepted', 'pending', 'review', 'resolved', 'declined');
 
-create table author
+create table if not exists author
 (
     id         uuid primary key,
     full_name  varchar(255),
     tg_user_id varchar(40) -- id from TG as user_id --
 );
 
-create table claims
+create index if not exists ix_tg_user_id_search on author (tg_user_id);
+
+create table if not exists claims
 (
     id         serial primary key,
     created_at timestamptz default now(),
@@ -27,14 +29,26 @@ create table claims
     link       varchar(255) null
 );
 
-create index ix_type_search on claims (type);
-create index ix_status_search on claims (status);
-create index ix_created_at_ordering on claims (created_at);
-create index ix_phone_link_composed on claims (phone, link);
+create index if not exists ix_type_search on claims (type);
+create index if not exists ix_status_search on claims (status);
+create index if not exists ix_created_at_ordering on claims (created_at);
+create index if not exists ix_phone_link_composed on claims (phone, link);
+create index if not exists ix_platform_trgm on claims using gist (platform gist_trgm_ops( siglen= 32));
 
-create table image
+create table if not exists image
 (
     id       uuid primary key,
     claim_id int references claims deferrable initially deferred,
     image    varchar(255) -- path to folder --
 );
+
+
+create table if not exists malware
+(
+    id       uuid primary key,
+    -- type of malware, like cryptographer/worm/joiner
+    type     varchar(40),
+    claim_id int not null references claims deferrable initially deferred
+);
+
+create index if not exists ix_type_search on malware (type);

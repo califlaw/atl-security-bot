@@ -26,7 +26,7 @@ for _phone_hdl in [
 for _phone_check_hdl in [ParseCheckPhoneHandler]:
     _check_phone_handlers[_phone_check_hdl.state] = _phone_check_hdl
 
-for _link_check_hdl in []:
+for _link_check_hdl in [ParseLinkCheckProcessHandler]:
     _check_link_handlers[_link_check_hdl.state] = _link_check_hdl
 
 
@@ -77,6 +77,27 @@ def registration_handlers(application: Application) -> None:
         persistent=False,
     )
 
+    conversation_link_check_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler(
+                StartCheckLinkHandler.command, StartCheckLinkHandler.logic
+            )
+        ],
+        states={
+            state.value: [
+                CallbackQueryHandler(callback=klass.logic)
+                if klass.is_query and not klass.filters
+                else MessageHandler(
+                    filters=klass.filters, callback=klass.logic
+                )
+            ]  # type: klass: Type[BaseHandlerKlass]
+            for (state, klass) in _check_link_handlers.items()
+        },
+        fallbacks=[],
+        name="conversation_check_link",
+        persistent=False,
+    )
+
     help_handler = CommandHandler(HelpHandler.command, HelpHandler.logic)
     start_handler = CommandHandler(StartHandler.command, StartHandler.logic)
 
@@ -92,6 +113,7 @@ def registration_handlers(application: Application) -> None:
     application.add_handlers(
         [
             conversation_phone_check_handler,
+            conversation_link_check_handler,
             conversation_phone_handler,
             start_check_claim_handler,
             buttons_cb_handler,
