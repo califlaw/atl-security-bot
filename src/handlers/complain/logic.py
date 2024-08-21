@@ -3,6 +3,7 @@ from typing import Tuple
 import structlog
 from telegram import Document, InlineKeyboardButton, PhotoSize, Update
 from telegram.ext import ContextTypes
+from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
 from src.core.transliterate import R
@@ -54,12 +55,17 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     context.user_data["claim"] = claim.id
     if url := payload.get("link"):  # type: str
         vt = VirusTotal()
-        save_analyze = claim_obj.save_virustotal_analyze(claim_id=claim.id)
         await create_bg_task(
-            vt.scan_url(url=url, wait_for_completion=False), save_analyze
+            vt.scan_url(url=url, wait_for_completion=True),
+            claim_obj.save_virustotal_analyze,
+            ctx={"claim_id": claim.id},
         )
 
-    await update.message.reply_text(R.string.ask_claim_platform)
+    await update.message.reply_text(
+        text=escape_markdown(
+            R.string.ask_claim_platform, version=2, entity_type=None
+        )
+    )
 
     return HandlerStateEnum.AWAIT_PLATFORM.value
 

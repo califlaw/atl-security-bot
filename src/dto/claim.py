@@ -207,5 +207,10 @@ class ClaimDTO(BaseDTO):
             record=Claim,
         )
 
-    async def save_virustotal_analyze(self, claim_id: int):
-        pass
+    async def save_virustotal_analyze(self, claim_id: int, task_result: str):
+        await self.db.execute_query(
+            """
+            insert into malware (type, claim_id) values (%(type)s, %(claim_id)s)
+            """,
+            params={"claim_id": claim_id, "type": task_result},
+        )

@@ -1,22 +1,25 @@
 import asyncio
 from typing import Any, Dict
+from urllib.parse import urlencode, urljoin
 
 import httpx
 
 from src.core.settings import settings
-from src.core.utils import serialize_orjson
+from src.core.utils import decode_url_b64, serialize_orjson
 
 
 class VirusTotal:
+    _version: int = settings.getint("virus.total", "version", fallback=3)
+    _base_url = f"https://www.virustotal.com/api/v{_version}/"
     timeout: float = settings.getfloat("virus.total", "timeout")
     default_headers = {
-        "x-apikey": settings.get("virus.total", "token"),
+        "X-Apikey": settings.get("virus.total", "token"),
         "Content-Type": "application/x-www-form-urlencoded",
     }
 
     async def request_query(
         self,
-        url: str,
+        part_url: str,
         data: Dict[str, Any] | str | None = None,
         method: str = "post",
         headers: Dict[str, str] | None = None,
@@ -27,21 +30,29 @@ class VirusTotal:
             timeout=self.timeout,
             transport=httpx.AsyncHTTPTransport(retries=10),
         ) as client:  # type: httpx.AsyncClient
-            if method != "get" and data is not None:
-                data: Dict = serialize_orjson(  # type: ignore
-                    content=data
-                ).decode()
-                if headers is None:
-                    headers = self.default_headers
+            if headers is None:
+                headers = self.default_headers
 
             request_kwargs = {
                 "method": method,
-                "url": url,
-                "headers": headers or {},
+                "headers": headers,
+                "url": urljoin(self._base_url, part_url),
             }
 
-            if data is not None and method.lower() != "get":
-                request_kwargs["data"] = data
+            if (
+                data is not None
+                and method.lower() != "get"
+                and headers["Content-Type"] == "application/json"
+            ):
+                request_kwargs["data"] = serialize_orjson(
+                    content=data
+                ).decode()
+            elif (
+                data is not None
+                and headers.get("Content-Type")
+                == "application/x-www-form-urlencoded"
+            ):
+                request_kwargs["data"] = urlencode(data)
             elif data is not None:
                 request_kwargs["params"] = data
 
@@ -56,19 +67,47 @@ class VirusTotal:
             except httpx.HTTPStatusError:
                 return None
 
-    async def _wait_for_analysis_completion(self, analysis):
+    async def _wait_for_analysis_completion(self, hash_link: str):
         while True:
-            analysis = await self.get_object("/analyses/{}", analysis.id)
-            if analysis.status == "completed":
-                break
-            await asyncio.sleep(20)
+            analysis: Dict = (
+                (
+                    await self.request_query(
+                        f"urls/{hash_link}", method="get", raise_error=False
+                    )
+                ).json()
+                or {}
+            ).get("data", {})
+            if status := analysis.get("attributes", {}).get("status"):
+                if status not in (
+                    "creating",
+                    "starting",
+                ):
+                    await asyncio.sleep(20)
+            break
         return analysis
 
-    async def scan_url(self, url: str, wait_for_completion: bool = False):
-        result = await self.request_query(
-            "/urls", data={"url": url}, method="post"
+    @staticmethod
+    def _detect_reason_analyse(stats: Dict):
+        return max(stats, key=stats.get)
+
+    async def scan_url(
+        self, url: str, wait_for_completion: bool = False
+    ) -> str:
+        result_url_response = (
+            (
+                await self.request_query(
+                    "urls", data={"url": url}, raise_error=False
+                )
+            )
+            .json()
+            .get("data", {})
         )
         if wait_for_completion:
-            await self._wait_for_analysis_completion(analysis=result)
+            result = await self._wait_for_analysis_completion(
+                hash_link=decode_url_b64(link=url)
+            )
+            return self._detect_reason_analyse(
+                stats=result["attributes"]["last_analysis_stats"]
+            )
 
-        return result
+        return result_url_response.get("id")

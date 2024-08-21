@@ -22,5 +22,5 @@ debug = false
 
 [virus.total]
 token =
-timeout = 10
-version = 0.18.2
+timeout = 300
+version = 3
