@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 COPY poetry.lock poetry.lock
 COPY pyproject.toml pyproject.toml
 
-RUN apk add make
+RUN apk add make postgresql-client
 RUN pip install -U pip && pip install poetry && \
     poetry config virtualenvs.create false && \
     poetry config installer.max-workers 20 && \

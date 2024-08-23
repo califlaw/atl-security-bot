@@ -2,6 +2,9 @@
 .git
 .gitignore
 
+# Configs
+bot.config.ini
+
 # Docker
 docker-compose.yml
 .docker
