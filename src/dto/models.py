@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Sequence
 from uuid import UUID
 
 from asyncpg import Record
@@ -37,23 +37,25 @@ def create_record_class():
 BaseRecord = create_record_class()
 
 
+class Image(BaseRecord):
+    id: UUID
+    claim_id: int
+    image_path: str | Path
+
+
 class Claim(BaseRecord):
     id: int
     status: StatusEnum
     created_at: datetime
     type: Literal["phone", "url"]
     decision: str
-    link: str | None
-    phone: str | None
+    source: str = ""
+    link: str | None = None
+    phone: str | None = None
+    images: Sequence[Image] = []
 
 
 class Author(BaseRecord):
     id: int
     full_name: str
     tg_user_id: str
-
-
-class Image(BaseRecord):
-    id: UUID
-    claim_id: int
-    image_path: str | Path | None

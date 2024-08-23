@@ -25,7 +25,10 @@ from src.keyboards.menu import make_reply_markup
 logger = structlog.stdlib.get_logger("handlers.complain")
 
 
-async def _notify_callback_supergroup(claim: Claim | None = None):
+async def _notify_callback_supergroup(claim: Claim | None = None) -> None:
+    if not settings.getboolean("bot", "notifyNewClaim"):
+        return
+
     try:
         bot = Bot(token=settings.get("bot", "token"))
         await bot.send_message(
@@ -63,7 +66,7 @@ async def complain_parse_phone_or_link_ask_platform_callback(
         await update.message.reply_text(R.string.incorrect_phone)
         return HandlerStateEnum.AWAIT_PHONE_OR_LINK.value
 
-    claim = await claim_obj.initiation_claim(
+    claim: Claim = await claim_obj.initiation_claim(
         author=update.effective_user,
         payload=payload,
     )

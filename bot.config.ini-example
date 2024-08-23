@@ -9,6 +9,7 @@ dateFormat = %%d-%%m-%%Y
 dateTimeFormat = %%d-%%m-%%Y %%H:%%M
 
 [bot]
+notifyNewClaim = true
 token =
 operators =
 superGroupId =

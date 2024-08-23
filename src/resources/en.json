@@ -1,6 +1,8 @@
 {
   "no": "No",
   "yes": "Yes",
+  "link": "Link",
+  "phone": "Phone number",
   "enter_link": "Enter link",
   "enter_phone": "Enter phone number",
   "add_claim_link": "Add claim of link",

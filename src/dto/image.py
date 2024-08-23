@@ -1,11 +1,9 @@
 import io
 import os
-from typing import Any, List, Tuple
+from typing import List, Sequence, Tuple
 
 import aiofiles
-from asyncpg import Record
-from telegram import Document, File, InputFile, PhotoSize
-from telegram._utils.files import parse_file_input
+from telegram import Document, File, InputMediaPhoto, PhotoSize
 
 from src.core.settings import BASE_DIR, settings
 from src.dto.base import BaseDTO
@@ -19,25 +17,30 @@ class ImageDTO(BaseDTO):
         _root = BASE_DIR if from_root else ""
         return os.path.join(_root, "attachments", f"claim-{self._claim_id}")
 
-    async def attach_images(
-        self, claim_id: int
-    ) -> List[str | InputFile | Any]:
-        _img_files = []
-        images: List[Record] = await self.db.execute_query(
-            "select id, image_path from image where claim_id = %(claim_id)s",
-            params={"claim_id": claim_id},
-            record=Image,
+    async def attach_images(self, claim_id: int) -> Sequence[InputMediaPhoto]:
+        _img_files: Sequence = []
+        self._claim_id = claim_id
+        images: List[Image] | Image = (
+            await self.db.execute_query(  # noqa
+                """
+                select id, claim_id, image_path 
+                from image where claim_id = %(claim_id)s
+                """,
+                params={"claim_id": claim_id},
+                record=Image,
+            )
+            or []
         )
-        for image in images or []:  # type: Image
+        if isinstance(images, Image):
+            images = [images]  # cast object Image to List[Image]
+
+        for image in images:  # type: Image
             _, file_name = os.path.split(image.image_path)
-            _path = self.get_attachment_path(from_root=True)
-            async with aiofiles.open(
-                f"{_path}/{image.image_path}", mode="rb"
-            ) as img:
+            async with aiofiles.open(image.image_path, mode="rb") as img:
                 b_img: bytes = await img.read()
-                _img_files.append(
-                    parse_file_input(
-                        b_img, tg_type=PhotoSize, filename=file_name
+                _img_files.append(  # noqa
+                    InputMediaPhoto(
+                        b_img, filename=file_name, has_spoiler=True
                     )
                 )
 
