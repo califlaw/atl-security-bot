@@ -1,23 +1,39 @@
 from typing import Tuple
 
 import structlog
-from telegram import Document, InlineKeyboardButton, PhotoSize, Update
+from telegram import Bot, Document, InlineKeyboardButton, PhotoSize, Update
+from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
+from src.core.settings import settings
+from src.core.templates import render_template
 from src.core.transliterate import R
 from src.core.utils import create_bg_task, get_link
 from src.core.virustotal import VirusTotal
 from src.dto.claim import ClaimDTO, normalizer
 from src.dto.image import ImageDTO
+from src.dto.models import Claim
 from src.handlers.button_cb.enums import CallbackStateEnum
 from src.handlers.complain.enums import HandlerStateEnum
+from src.handlers.enums import TemplateFiles
 from src.handlers.exceptions import ExtractClaimIDError
 from src.handlers.helpers import extract_claim_id
 from src.keyboards.menu import make_reply_markup
 
 logger = structlog.stdlib.get_logger("handlers.complain")
+
+
+async def _notify_callback_supergroup(claim: Claim | None = None):
+    try:
+        bot = Bot(token=settings.get("bot", "token"))
+        await bot.send_message(
+            chat_id=settings.get("bot", "superGroupId"),
+            text=render_template(TemplateFiles.alarm, mapping=claim),
+        )
+    except TelegramError:
+        pass
 
 
 async def complain_phone_callback(update: Update, _) -> int:
@@ -66,6 +82,7 @@ async def complain_parse_phone_or_link_ask_platform_callback(
             R.string.ask_claim_platform, version=2, entity_type=None
         )
     )
+    await _notify_callback_supergroup(claim=claim)
 
     return HandlerStateEnum.AWAIT_PLATFORM.value
 

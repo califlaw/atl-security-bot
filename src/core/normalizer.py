@@ -62,8 +62,9 @@ def type_normalizer(payload: Dict | Type[BaseRecord]) -> Dict:
     result = {}
     for key, value in payload.items():  # type: str, Any
         if isinstance(value, datetime.datetime):
-            utc_timezone = pytz.utc
-            value = utc_timezone.localize(value)
+            if value.tzname() != "UTC":
+                utc_timezone = pytz.utc
+                value = utc_timezone.localize(value)
             result[key] = value.astimezone(
                 tz=pytz.timezone(settings.get("DEFAULT", "timezone"))
             ).strftime(settings.get("DEFAULT", "dateTimeFormat"))

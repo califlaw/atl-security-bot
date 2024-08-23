@@ -29,7 +29,9 @@ def unpack_args(args):
     }
 
 
-def async_partial(f: Callable, *args) -> Callable[[], Coroutine[Any, Any, Any]]:
+def async_partial(
+    f: Callable, *args
+) -> Callable[[], Coroutine[Any, Any, Any]]:
     async def f2():
         result = f(**unpack_args(*args))
         if asyncio.iscoroutinefunction(f):
