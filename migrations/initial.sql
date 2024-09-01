@@ -51,4 +51,4 @@ create table if not exists malware
     claim_id int not null references claims deferrable initially deferred
 );
 
-create index if not exists ix_type_search on malware (type);
+create index if not exists ix_malware_type_search on malware (type);

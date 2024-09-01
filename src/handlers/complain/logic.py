@@ -1,7 +1,15 @@
-from typing import Tuple
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Tuple
 
 import structlog
-from telegram import Bot, Document, InlineKeyboardButton, PhotoSize, Update
+from telegram import (
+    Bot,
+    Document,
+    InlineKeyboardButton,
+    Message,
+    PhotoSize,
+    Update,
+)
 from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
@@ -25,18 +33,23 @@ from src.keyboards.menu import make_reply_markup
 logger = structlog.stdlib.get_logger("handlers.complain")
 
 
-async def _notify_callback_supergroup(claim: Claim | None = None) -> None:
+@asynccontextmanager
+async def _notify_callback_supergroup(
+    claim: Claim | None = None,
+) -> AsyncGenerator[Message]:
     if not settings.getboolean("bot", "notifyNewClaim"):
         return
 
+    bot = Bot(token=settings.get("bot", "token"))
     try:
-        bot = Bot(token=settings.get("bot", "token"))
-        await bot.send_message(
+        yield await bot.send_message(
             chat_id=settings.get("bot", "superGroupId"),
             text=render_template(TemplateFiles.alarm, mapping=claim),
         )
     except TelegramError:
         pass
+    finally:
+        del bot
 
 
 async def complain_phone_callback(update: Update, _) -> int:
@@ -85,7 +98,8 @@ async def complain_parse_phone_or_link_ask_platform_callback(
             R.string.ask_claim_platform, version=2, entity_type=None
         )
     )
-    await _notify_callback_supergroup(claim=claim)
+    async with _notify_callback_supergroup(claim=claim):  # type: Message
+        pass
 
     return HandlerStateEnum.AWAIT_PLATFORM.value
 
