@@ -36,7 +36,7 @@ logger = structlog.stdlib.get_logger("handlers.complain")
 @asynccontextmanager
 async def _notify_callback_supergroup(
     claim: Claim | None = None,
-) -> AsyncGenerator[Message]:
+) -> AsyncGenerator[Claim, Message]:
     if not settings.getboolean("bot", "notifyNewClaim"):
         return
 
