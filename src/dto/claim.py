@@ -166,8 +166,10 @@ class ClaimDTO(BaseDTO):
             from claims;
             """
         )
-        _platforms_records = await self.db.execute_query(
-            """
+        # there are queries could return Nonetype, if not found platforms
+        _platforms_records = (
+            await self.db.execute_query(
+                """
             SELECT c2.platform
             FROM claims c1
             JOIN claims c2 ON c1.id <> c2.id
@@ -175,6 +177,8 @@ class ClaimDTO(BaseDTO):
             GROUP BY 
                 c2.platform, c1.platform, similarity(c1.platform, c2.platform);
             """
+            )
+            or []
         )
         platforms = await self.db.execute_query(
             " UNION ALL ".join(  # noqa
@@ -190,7 +194,7 @@ class ClaimDTO(BaseDTO):
         )
 
         result.update(totals)
-        result["platforms"] = platforms
+        result["platforms"] = platforms or []
         return result
 
     async def check_existed_linked_claim(self, link: str):
