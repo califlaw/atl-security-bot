@@ -17,7 +17,7 @@ from telegram.helpers import escape_markdown
 from src.core.logger import log_event
 from src.core.settings import settings
 from src.core.templates import render_template
-from src.core.transliterate import R
+from src.core.transliterate import R, effective_message
 from src.core.utils import create_bg_task, get_link
 from src.core.virustotal import VirusTotal
 from src.dto.claim import ClaimDTO, normalizer
@@ -53,7 +53,7 @@ async def _notify_callback_supergroup(
 
 
 async def complain_phone_callback(update: Update, _) -> int:
-    await update.effective_chat.send_message(R.string.enter_phone_or_link)
+    await effective_message(update, message=R.string.enter_phone_or_link)
     return HandlerStateEnum.AWAIT_PHONE_OR_LINK.value
 
 
@@ -76,7 +76,9 @@ async def complain_parse_phone_or_link_ask_platform_callback(
         payload["link"] = get_link(url=source_claim)
 
     if not payload.get("phone") and not payload.get("link"):
-        await update.message.reply_text(R.string.incorrect_phone)
+        await effective_message(
+            update, message=R.string.incorrect_phone, is_reply=True
+        )
         return HandlerStateEnum.AWAIT_PHONE_OR_LINK.value
 
     claim: Claim = await claim_obj.initiation_claim(
@@ -93,10 +95,8 @@ async def complain_parse_phone_or_link_ask_platform_callback(
             ctx={"claim_id": claim.id},
         )
 
-    await update.message.reply_text(
-        text=escape_markdown(
-            R.string.ask_claim_platform, version=2, entity_type=None
-        )
+    await effective_message(
+        update, message=R.string.ask_claim_platform, is_reply=True
     )
     async with _notify_callback_supergroup(claim=claim):  # type: Message
         pass
@@ -130,8 +130,10 @@ async def complain_parse_platform_ask_photos_callback(
         ),
     ]
 
-    await update.message.reply_text(
-        text=R.string.attach_images,
+    await effective_message(
+        update,
+        message=R.string.attach_images,
+        is_reply=True,
         reply_markup=make_reply_markup(button_list=button_list),
     )
 
@@ -156,7 +158,9 @@ async def complain_parse_photos_or_stop_callback(
     dto = ImageDTO(db=context.bot_data["database"])
     await dto.save_images(claim_id=claim_id, images=images)
 
-    await update.message.reply_text(R.string.thx_finish_claim)
+    await effective_message(
+        update, message=R.string.thx_finish_claim, is_reply=True
+    )
     return HandlerStateEnum.STOP_CONVERSATION.value
 
 
@@ -166,5 +170,8 @@ async def fallback_exit_conv_callback(update: Update, _) -> int:
     if query.data == CallbackStateEnum.skip_photos.value:
         return HandlerStateEnum.STOP_CONVERSATION.value
 
-    await query.message.chat.send_message(R.string.thx_finish_claim)
+    text = escape_markdown(
+        R.string.thx_finish_claim, version=2, entity_type=None
+    )
+    await query.message.chat.send_message(text=text)
     return HandlerStateEnum.STOP_CONVERSATION.value

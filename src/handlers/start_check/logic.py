@@ -2,7 +2,7 @@ from telegram import InlineKeyboardButton, Update
 from telegram.ext import ContextTypes
 
 from src.core.templates import render_template
-from src.core.transliterate import R
+from src.core.transliterate import R, effective_message
 from src.dto.claim import ClaimDTO
 from src.dto.models import Claim
 from src.handlers.button_cb.enums import CallbackStateEnum
@@ -30,7 +30,8 @@ async def start_manage_check_callback(
     context.user_data["claim"] = claim.id
 
     await update.effective_chat.send_media_group(claim.images)
-    await update.effective_chat.send_message(
-        text=render_template(TemplateFiles.start_check, mapping=claim),
+    await effective_message(
+        update,
+        message=render_template(TemplateFiles.start_check, mapping=claim),
         reply_markup=make_reply_markup(button_list=button_list),
     )

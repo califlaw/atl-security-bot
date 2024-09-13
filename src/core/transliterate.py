@@ -3,6 +3,8 @@ import os
 
 import aiofiles
 import structlog
+from telegram import Update
+from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
 from src.core.settings import BASE_DIR
@@ -61,3 +63,14 @@ async def load_strings():
             lang, _ = _trn_file.split(".")
             full_path = os.path.join(root, _trn_file)
             await R.string.load_strings(lang, full_path)
+
+
+async def effective_message(
+    update: Update, message: str, is_reply: bool = False, **kwargs
+) -> None:
+    text = escape_markdown(message, version=2, entity_type=None)
+
+    if is_reply:
+        await update.message.reply_text(text=text, **kwargs)
+    else:
+        await update.effective_chat.send_message(text=text, **kwargs)

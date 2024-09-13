@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from src.core.templates import render_template
-from src.core.transliterate import R
+from src.core.transliterate import R, effective_message
 from src.core.utils import ChatActionContext
 from src.dto.claim import ClaimDTO, normalizer
 from src.handlers.check_number.enums import HandleCheckPhoneEnum
@@ -26,13 +26,12 @@ async def check_number_callback(
             normalizer.normalize(phone=update.message.text, as_db=True)
         )
 
-    await update.effective_chat.send_message(
-        text=render_template(
+    await effective_message(
+        update,
+        message=render_template(
             TemplateFiles.check_phone_claim, mapping=existed_claim
         ),
     )
-    await update.effective_chat.send_message(
-        text=R.string.thx_security_kg_alga
-    )
+    await effective_message(update, message=R.string.thx_security_kg_alga)
 
     return HandleCheckPhoneEnum.STOP_CONVERSATION.value

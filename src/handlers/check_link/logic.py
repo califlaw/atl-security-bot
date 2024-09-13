@@ -1,9 +1,8 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-from telegram.helpers import escape_markdown
 
 from src.core.templates import render_template
-from src.core.transliterate import R
+from src.core.transliterate import R, effective_message
 from src.core.utils import ChatActionContext
 from src.dto.claim import ClaimDTO
 from src.dto.models import Claim
@@ -30,13 +29,12 @@ async def parse_link_process_callback(
             "_type_claim": getattr(claim, "type", R.string.unknown_type),
         }
 
-    await update.effective_chat.send_message(
-        text=render_template(TemplateFiles.check_link_claim, mapping=result),
+    await effective_message(
+        update,
+        message=render_template(
+            TemplateFiles.check_link_claim, mapping=result
+        ),
     )
-    await update.effective_chat.send_message(
-        text=escape_markdown(
-            R.string.dont_follow_links, version=2, entity_type=None
-        )
-    )
+    await effective_message(update, message=R.string.dont_follow_links)
 
     return HandleCheckLinkEnum.STOP_CONVERSATION.value

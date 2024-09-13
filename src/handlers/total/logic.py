@@ -4,6 +4,7 @@ from telegram.ext import ContextTypes
 
 from src.core.logger import log_event
 from src.core.templates import render_template
+from src.core.transliterate import effective_message
 from src.dto.claim import ClaimDTO
 from src.handlers.enums import TemplateFiles
 
@@ -27,6 +28,7 @@ async def total_callback(
 
     await log_event(logger, message="Calculate common total information")
 
-    await update.effective_chat.send_message(
-        text=render_template(TemplateFiles.total, mapping=claim_statistics),
+    await effective_message(
+        update,
+        message=render_template(TemplateFiles.total, mapping=claim_statistics),
     )

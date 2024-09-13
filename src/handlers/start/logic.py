@@ -3,7 +3,7 @@ from telegram import InlineKeyboardButton, Update
 
 from src.core.settings import settings
 from src.core.templates import render_template
-from src.core.transliterate import R
+from src.core.transliterate import R, effective_message
 from src.handlers.enums import TemplateFiles
 from src.keyboards.menu import make_reply_markup
 
@@ -18,7 +18,8 @@ async def start_callback(update: Update, _) -> None:
         ),
     ]
 
-    await update.effective_chat.send_message(
-        text=render_template(TemplateFiles.start),
+    await effective_message(
+        update,
+        message=render_template(TemplateFiles.start),
         reply_markup=make_reply_markup(button_list=button_list),
     )
