@@ -18,6 +18,7 @@
   "ask_claim_platform": "What is platform? (lalafo.kg, instagram, etc...)",
   "skip_add_images": "Skip step off upload images or videos",
   "attach_images": "Pls, attach images",
+  "phone_not_found": "Phone number not found in base of claims",
   "dont_follow_links": "A thorough study will be done manually and you will receive a response from the bot!\n\nDo not go and do not enter your data on unknown sources!",
   "thx_finish_claim": "Thanks for yor attention in cyber-bot, our team already work on your claim",
   "thx_decision_claim": "Thanks for decision claim!",

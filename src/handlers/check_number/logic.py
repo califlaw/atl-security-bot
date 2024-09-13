@@ -26,12 +26,16 @@ async def check_number_callback(
             normalizer.normalize(phone=update.message.text, as_db=True)
         )
 
-    await effective_message(
-        update,
-        message=render_template(
-            TemplateFiles.check_phone_claim, mapping=existed_claim
-        ),
-    )
+    if not existed_claim:
+        await effective_message(update, message=R.string.phone_not_found)
+    else:
+        await effective_message(
+            update,
+            message=render_template(
+                TemplateFiles.check_phone_claim, mapping=existed_claim
+            ),
+        )
+
     await effective_message(update, message=R.string.thx_security_kg_alga)
 
     return HandleCheckPhoneEnum.STOP_CONVERSATION.value
