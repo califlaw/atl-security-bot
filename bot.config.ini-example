@@ -1,0 +1,27 @@
+[DEFAULT]
+jsonLog = true
+loggingLevel = INFO
+sentryDsn =
+environment = dev
+minHeightImage = 400
+timezone = Asia/Bishkek
+dateFormat = %%d-%%m-%%Y
+dateTimeFormat = %%d-%%m-%%Y %%H:%%M
+
+[bot]
+notifyNewClaim = true
+token =
+operators =
+superGroupId =
+communityGroupLink =
+max_concurrent = 256
+
+[database]
+dsn = postgresql://user:password@localhost:5432/dbname
+poolSize = 10
+debug = false
+
+[virus.total]
+token =
+timeout = 300
+version = 3

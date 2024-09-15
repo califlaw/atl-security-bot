@@ -1,0 +1,13 @@
+services:
+  bot:
+    image: registry.gitlab.com/kdelinxd/bot-cyber-detection
+    container_name: atl-secure-bot
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./attachments:/opt/app/attachments/
+      - ./bot.config.ini:/opt/app/bot.config.ini
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
