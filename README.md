@@ -23,12 +23,21 @@ git branch -M feature/<your-update-branch-name>
 git push -uf origin feature/<your-update-branch-name>
 ```
 
+## Installation and development
+For development version you need pull from gitlab latest version. Within all dependency dev-tools, like make / gcc / python-dev, and etc... As main package version we use a `poetry>=1.8`, this tools will install on existed virtual environment or could create new. Before that, dont forget install dependencies for your OS (linux / macos / windows) - `libpq-dev`, `python3.11-dev`, `make`, `rustc`. And start will successfully.
+
+**To start dev mode application:**
+- set config variable as `environment = dev` in [bot.config.ini](bot.config.ini) file 
+- use a command line to execute server bot `$ make start`
+- reload application when have added new logic code
+
+
 ## Deploy
 
 If your want deploy bot on your server, you just need fill up settings file ([bot.config.ini](bot.config.ini)). 
 Set constants on registered bot name and start image code by command:
 
-Migrate database
+**Migrate database**
 ```shell
 # auth by postgres in linux shell
 $ su - postgres
@@ -38,14 +47,12 @@ $ createrole cyberbot_u && createdb cyberbot -O cyberbot_u
 $ psql -U cyberbot_u -d cyberbot < migrations/initial.sql
 ```
 
+**Init configuration file and start**
 ```shell
 $ make init_config
 # fill configs and keys of your bot / database / etc...
 $ make start
 ```
-
-## Installation and development
-For development version you need pull from gitlab latest version. Within all dependency dev-tools, like make / gcc / python-dev, and etc... As main package version we use a `poetry>=1.8`, this tools will install on existed virtual environment or could create new. Before that, dont forget install dependencies for your OS (linux / macos / windows) - `libpq-dev`, `python3.11-dev`, `make`, `rustc`. And start will successfully.   
 
 ## Usage
 Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
