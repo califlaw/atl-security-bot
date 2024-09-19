@@ -54,7 +54,7 @@ def main():
     )
 
     upd_processor = UpdProcessorMiddleware(
-        max_concurrent_updates=settings.getint("bot", "max_concurrent")
+        max_concurrent_updates=settings.getint("bot", "maxConcurrent")
     )
 
     application = (

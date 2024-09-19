@@ -9,12 +9,14 @@ dateFormat = %%d-%%m-%%Y
 dateTimeFormat = %%d-%%m-%%Y %%H:%%M
 
 [bot]
-notifyNewClaim = true
+notifyNewClaim = false
+; token can fetch using -BotFather- on your tg app
 token =
+; operators allowed only as <int> values, joined by comma separate
 operators =
 superGroupId =
 communityGroupLink =
-max_concurrent = 256
+maxConcurrent = 256
 
 [database]
 dsn = postgresql://user:password@localhost:5432/dbname
