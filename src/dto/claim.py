@@ -125,25 +125,42 @@ class ClaimDTO(BaseDTO):
             """
             WITH
             unique_claim_fraud_cases AS (
-                SELECT EXISTS (SELECT 1
-                               FROM claims
-                               WHERE phone = %(phone)s 
-                                    and type = 'phone') AS exists),
-            latest_claim_date AS (SELECT MAX(created_at) AS created_at
-                                  FROM claims
-                                  WHERE phone = %(phone)s
-                                    and type = 'phone'),
-            claim_platform AS (SELECT platform
-                               FROM claims
-                               WHERE phone = %(phone)s
-                                 and type = 'phone'
-                               GROUP BY platform
-                               ORDER BY count(1) DESC
-                               LIMIT 1),
-            total_claims AS (SELECT count(1) AS total
-                             FROM claims
-                             WHERE phone = %(phone)s
-                               and type = 'phone')
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM claims
+                    WHERE 
+                        phone = %(phone)s and 
+                        type = 'phone' and 
+                        status = 'resolved'::statusenum
+                ) AS exists
+            ),
+            latest_claim_date AS (
+                SELECT MAX(created_at) AS created_at
+                FROM claims
+                WHERE 
+                    phone = %(phone)s and 
+                    type = 'phone' and 
+                    status = 'resolved'::statusenum
+            ),
+            claim_platform AS (
+                SELECT platform
+                FROM claims
+                WHERE 
+                    phone = %(phone)s
+                    and type = 'phone'
+                    and status = 'resolved'::statusenum
+                GROUP BY platform
+                ORDER BY count(1) DESC
+                LIMIT 1
+            ),
+            total_claims AS (
+                SELECT count(1) AS total
+                FROM claims
+                WHERE 
+                    phone = %(phone)s and 
+                    type = 'phone' and 
+                    status = 'resolved'::statusenum
+            )
             SELECT ucf.exists     AS _existed_claim,
                    lid.created_at AS _last_claim,
                    fp.platform    AS _platform_claim,
@@ -205,7 +222,7 @@ class ClaimDTO(BaseDTO):
                 cm.link as link, m.type as type
             from claims cm
                      join malware m on cm.id = m.claim_id
-            where cm.link = %(link)s;
+            where cm.link = %(link)s and cm.status = 'resolved'::statusenum;
             """,
             params={"link": link},
             record=Claim,
