@@ -1,6 +1,7 @@
 from typing import Dict
 from uuid import UUID
 
+from asyncpg import Record
 from telegram import User
 
 from src.core.normalizer import NormalizePhoneNumber
@@ -187,16 +188,20 @@ class ClaimDTO(BaseDTO):
         _platforms_records = (
             await self.db.execute_query(
                 """
-            select c2.platform
-            from claims c1
-            join claims c2 on c1.id <> c2.id
-            where similarity(c1.platform, c2.platform) >= 0.8
-            group by 
-                c2.platform, c1.platform, similarity(c1.platform, c2.platform);
-            """
+                select c2.platform
+                from claims c1
+                join claims c2 on c1.id <> c2.id
+                where similarity(c1.platform, c2.platform) >= 0.8
+                group by 
+                    c2.platform, c1.platform, 
+                    similarity(c1.platform, c2.platform);
+                """
             )
             or []
         )
+        if isinstance(_platforms_records, Record):
+            # type cast record to list objects, on the way fetch one row
+            _platforms_records = [_platforms_records]
         platforms = await self.db.execute_query(
             " union all ".join(  # noqa
                 f"""
