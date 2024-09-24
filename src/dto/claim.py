@@ -73,7 +73,7 @@ class ClaimDTO(BaseDTO):
         return await self.db.execute_query(  # noqa
             """
             select * from claims where status = %(status)s 
-            order by created_at limit 1
+            order by created_at limit 1;
             """,
             params={"status": status.value},
             record=Claim,
@@ -87,7 +87,7 @@ class ClaimDTO(BaseDTO):
 
         await self.db.execute_query(
             """
-            update claims set status = %(status)s where id = %(id)s
+            update claims set status = %(status)s where id = %(id)s;
             """,
             params={"id": self._id, "status": status.value},
         )
@@ -95,7 +95,7 @@ class ClaimDTO(BaseDTO):
     async def set_platform_claim(self, platform: str):
         await self.db.execute_query(
             """
-            update claims set platform = %(platform)s where id = %(id)s
+            update claims set platform = %(platform)s where id = %(id)s;
             """,
             params={"id": self._id, "platform": platform},
         )
@@ -114,7 +114,7 @@ class ClaimDTO(BaseDTO):
             """
             update claims set 
                 decision = %(decision)s 
-            where id = %(id)s
+            where id = %(id)s;
             """,
             params={"id": claim_id, "decision": decision},
         )
@@ -123,52 +123,52 @@ class ClaimDTO(BaseDTO):
     async def check_existed_claim(self, phone: str):
         return await self.db.execute_query(
             """
-            WITH
-            unique_claim_fraud_cases AS (
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM claims
-                    WHERE 
+            with
+            unique_claim_fraud_cases as (
+                select EXISTS (
+                    select 1
+                    from claims
+                    where 
                         phone = %(phone)s and 
                         type = 'phone' and 
                         status = 'resolved'::statusenum
                 ) AS exists
             ),
             latest_claim_date AS (
-                SELECT MAX(created_at) AS created_at
-                FROM claims
-                WHERE 
+                select MAX(created_at) AS created_at
+                from claims
+                where 
                     phone = %(phone)s and 
                     type = 'phone' and 
                     status = 'resolved'::statusenum
             ),
             claim_platform AS (
-                SELECT platform
-                FROM claims
-                WHERE 
+                select platform
+                from claims
+                where 
                     phone = %(phone)s
                     and type = 'phone'
                     and status = 'resolved'::statusenum
-                GROUP BY platform
-                ORDER BY count(1) DESC
-                LIMIT 1
+                group by platform
+                order by count(1) DESC
+                limit 1
             ),
             total_claims AS (
-                SELECT count(1) AS total
-                FROM claims
-                WHERE 
+                select count(1) AS total
+                from claims
+                where 
                     phone = %(phone)s and 
                     type = 'phone' and 
                     status = 'resolved'::statusenum
             )
-            SELECT ucf.exists     AS _existed_claim,
+            select ucf.exists     AS _existed_claim,
                    lid.created_at AS _last_claim,
                    fp.platform    AS _platform_claim,
                    tc.total       AS _total_claims
-            FROM unique_claim_fraud_cases ucf
-                     CROSS JOIN latest_claim_date lid
-                     CROSS JOIN claim_platform fp
-                     CROSS JOIN total_claims tc;
+            from unique_claim_fraud_cases ucf
+                     cross join latest_claim_date lid
+                     cross join claim_platform fp
+                     cross join total_claims tc;
             """,
             params={"phone": phone},
         )
@@ -187,24 +187,24 @@ class ClaimDTO(BaseDTO):
         _platforms_records = (
             await self.db.execute_query(
                 """
-            SELECT c2.platform
-            FROM claims c1
-            JOIN claims c2 ON c1.id <> c2.id
-            WHERE similarity(c1.platform, c2.platform) >= 0.8
-            GROUP BY 
+            select c2.platform
+            from claims c1
+            join claims c2 on c1.id <> c2.id
+            where similarity(c1.platform, c2.platform) >= 0.8
+            group by 
                 c2.platform, c1.platform, similarity(c1.platform, c2.platform);
             """
             )
             or []
         )
         platforms = await self.db.execute_query(
-            " UNION ALL ".join(  # noqa
+            " union all ".join(  # noqa
                 f"""
-                    SELECT '{record['platform']}' as _name, count(*) as _counter
-                    FROM claims
-                    WHERE 
+                    select '{record['platform']}' as _name, count(*) as _counter
+                    from claims
+                    where 
                         similarity(platform, '{record['platform']}') > 0.7 and 
-                        status = 'resolved'
+                        status = 'resolved'::statusenum
                     """
                 for record in _platforms_records
             )
