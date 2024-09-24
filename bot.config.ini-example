@@ -15,6 +15,7 @@ token =
 ; operators allowed only as <int> values, joined by comma separate
 operators =
 superGroupId =
+helpGroupName =
 communityGroupLink =
 maxConcurrent = 256
 

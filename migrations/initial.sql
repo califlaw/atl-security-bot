@@ -18,7 +18,7 @@ create table if not exists claims
     type       IncidentEnum not null,
     status     StatusEnum   not null,
     -- platform claim, like instagram / lalafo / disel --
-    platform   varchar(255) not null,
+    platform   varchar(255) null,
     -- id from TG as user_id --
     author     uuid         not null references author deferrable initially deferred,
     -- could content text with links to sources of another sites --

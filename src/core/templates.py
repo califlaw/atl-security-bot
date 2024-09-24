@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Dict, LiteralString, Type
 
 import aiofiles
@@ -47,4 +48,6 @@ def render_template(
     except KeyError:
         text_template = R.string.error_template
 
-    return escape_markdown(text_template, version=2, entity_type=None)
+    _version = 2 if re.findall(r"_*\[]()~`>#+-=|{}.!", text_template) else 1
+
+    return escape_markdown(text_template, version=_version, entity_type=None)
