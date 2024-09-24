@@ -214,6 +214,9 @@ class ClaimDTO(BaseDTO):
                 for record in _platforms_records
             )
         )
+        if isinstance(platforms, Record):
+            # type cast record to list objects, on the way fetch one row
+            platforms = [platforms]
 
         result.update(totals)
         result["platforms"] = platforms or []

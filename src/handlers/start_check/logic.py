@@ -29,7 +29,8 @@ async def start_manage_check_callback(
     ).get_accepted_claim()
     context.user_data["claim"] = claim.id
 
-    await update.effective_chat.send_media_group(claim.images)
+    if claim.images:
+        await update.effective_chat.send_media_group(claim.images)
     await effective_message(
         update,
         message=render_template(TemplateFiles.start_check, mapping=claim),
