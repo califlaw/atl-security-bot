@@ -10,7 +10,6 @@ from orjson import orjson
 from telegram import Bot
 from telegram.constants import ChatAction
 
-
 simple_phone_regex = r"^(0|7|8)\d+"
 url_regex = (
     r"^(https?|ftp)://"

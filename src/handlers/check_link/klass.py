@@ -24,7 +24,6 @@ class StartCheckLinkHandler(BaseHandlerKlass):
 
 
 class ParseLinkCheckProcessHandler(BaseHandlerKlass):
-    command: str = ""
     filters: Type[MessageFilter] | None = (
         filters.TEXT
         & filters.Entity(MessageEntity.URL)

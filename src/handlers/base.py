@@ -7,7 +7,7 @@ from telegram.ext.filters import MessageFilter
 
 
 class BaseHandlerKlass:
-    command: str
+    command: str = ""
     is_query: bool = False
     state: Type[Enum] | None = None
     filters: Type[MessageFilter] | None = None

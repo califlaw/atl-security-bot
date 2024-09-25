@@ -22,7 +22,6 @@ class CheckNumberHandler(BaseHandlerKlass):
 
 
 class ParseCheckPhoneHandler(BaseHandlerKlass):
-    command: str = ""
     state: HandleCheckPhoneEnum = HandleCheckPhoneEnum.AWAIT_PHONE
     filters: Type[MessageFilter] | None = filters.Entity(
         MessageEntity.PHONE_NUMBER
