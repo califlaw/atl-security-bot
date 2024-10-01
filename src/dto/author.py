@@ -51,7 +51,7 @@ class AuthorDTO(BaseDTO):
                 returning *;
                 """,
                 params={
-                    "tg_user_id": author.id,
+                    "tg_id": author.id,
                     "tg_username": author.name,
                     "full_name": author.full_name,
                 },
