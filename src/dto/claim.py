@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, LiteralString
 from uuid import UUID
 
 from asyncpg import Record
@@ -7,7 +7,7 @@ from telegram import User
 from src.core.normalizer import NormalizePhoneNumber
 from src.dto.author import AuthorDTO
 from src.dto.base import BaseDTO
-from src.dto.exceptions import MissedFieldsDTOError
+from src.dto.exceptions import MissedFieldsDTOError, NotFoundEntity
 from src.dto.image import ImageDTO
 from src.dto.models import Claim
 from src.handlers.enums import StatusEnum
@@ -68,17 +68,53 @@ class ClaimDTO(BaseDTO):
             record=Claim,
         )
 
+    async def exp_resolved_claims(self, claim_id: int) -> None:
+        try:
+            claim: Claim = await self.get_detail_claim(
+                status=StatusEnum.resolved, claim_id=claim_id
+            )
+            result_claims: Record = await self.db.execute_query(
+                """
+                select count(1) as _count 
+                from claims cl
+                where cl.author = %(author_id)s and status = 'resolved';
+                """,
+                params={"author_id": claim.author},
+            )
+            await self._author.inc_exp(
+                author_id=claim.author,
+                claims_cnt=result_claims.get("_count", 0),
+            )
+        except NotFoundEntity:
+            return
+
     async def get_detail_claim(
-        self, status: StatusEnum = StatusEnum.accepted
+        self,
+        status: StatusEnum = StatusEnum.accepted,
+        claim_id: int | None = None,
     ) -> Claim:
-        return await self.db.execute_query(  # noqa
+        params: Dict = {"status": status.value}
+        if claim_id:
+            sql: LiteralString = """
+                select * from claims where status = %(status)s and id = %(id)s
+                order by created_at limit 1;
             """
-            select * from claims where status = %(status)s 
-            order by created_at limit 1;
-            """,
-            params={"status": status.value},
+            params["id"] = claim_id
+        else:
+            sql: LiteralString = """
+                select * from claims where status = %(status)s
+                order by created_at limit 1;
+            """
+
+        claim: Claim | None = await self.db.execute_query(  # noqa
+            sql,
+            params=params,
             record=Claim,
         )
+        if not claim:
+            raise NotFoundEntity
+
+        return claim
 
     async def set_status_claim(self, status: StatusEnum):
         assert self._id is not None, "Attribute _id is required, missed value!"
@@ -101,11 +137,13 @@ class ClaimDTO(BaseDTO):
             params={"id": self._id, "platform": platform},
         )
 
-    async def get_accepted_claim(self):
-        claim: Claim = await self.get_detail_claim()
-        claim.images = await self._image.attach_images(claim_id=claim.id)
-
-        return claim
+    async def get_accepted_claim(self) -> Claim | None:
+        try:
+            claim: Claim = await self.get_detail_claim()
+            claim.images = await self._image.attach_images(claim_id=claim.id)
+            return claim
+        except NotFoundEntity:
+            return None
 
     async def resolve_claim(
         self, claim_id: int, decision: str, status: StatusEnum

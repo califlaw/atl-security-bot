@@ -24,9 +24,14 @@ async def start_manage_check_callback(
         ),
     ]
 
-    claim: Claim = await ClaimDTO(
+    claim: Claim | None = await ClaimDTO(
         db=context.bot_data["database"]
     ).get_accepted_claim()
+
+    if not claim:
+        await effective_message(update, message=R.string.claim_not_found)
+        return
+
     context.user_data["claim"] = claim.id  # set context of `claim`
 
     if claim.images:

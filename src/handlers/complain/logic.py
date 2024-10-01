@@ -1,16 +1,11 @@
-from configparser import NoOptionError
-from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Tuple
+from typing import Tuple
 
 import structlog
-from telegram import Bot, Document, Message, PhotoSize, Update
-from telegram.error import TelegramError
+from telegram import Bot, Document, PhotoSize, Update
 from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
-from src.core.settings import settings
-from src.core.templates import render_template
 from src.core.transliterate import R, effective_message
 from src.core.utils import create_bg_task, get_link
 from src.core.virustotal import VirusTotal
@@ -18,30 +13,11 @@ from src.dto.claim import ClaimDTO, normalizer
 from src.dto.image import ImageDTO
 from src.dto.models import Claim
 from src.handlers.complain.enums import HandlerStateEnum
-from src.handlers.enums import TemplateFiles
 from src.handlers.exceptions import ExtractClaimIDError
 from src.handlers.helpers import extract_claim_id
+from src.helpers.notify_bot import notify_supergroup
 
 logger = structlog.stdlib.get_logger("handlers.complain")
-
-
-@asynccontextmanager
-async def _notify_callback_supergroup(
-    claim: Claim | None = None,
-) -> AsyncGenerator[Claim, Message] | None:
-    if not settings.getboolean("bot", "notifyNewClaim", fallback=False):
-        return
-
-    bot = Bot(token=settings.get("bot", "token"))
-    try:
-        yield await bot.send_message(
-            chat_id=settings.get("bot", "superGroupId"),
-            text=render_template(TemplateFiles.alarm, mapping=claim),
-        )
-    except (TelegramError, NoOptionError) as e:
-        await logger.aexception("Catch error from notify", e)
-    finally:
-        del bot
 
 
 async def complain_phone_callback(update: Update, _) -> int:
@@ -90,7 +66,7 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     await effective_message(
         update, message=R.string.ask_claim_platform, is_reply=True
     )
-    async with _notify_callback_supergroup(claim=claim):  # type: Message
+    async with notify_supergroup(claim=claim):  # type: Bot
         pass
 
     return HandlerStateEnum.AWAIT_PLATFORM.value

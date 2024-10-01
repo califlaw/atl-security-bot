@@ -24,6 +24,8 @@ async def post_init(_application: Application) -> None:
             dsn=sentry_dsn,
             environment=_env,
             sample_rate=1.0,
+            enable_tracing=True,
+            traces_sample_rate=1.0,
             profiles_sample_rate=1.0,
             integrations=[
                 HttpxIntegration(),

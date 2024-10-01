@@ -18,8 +18,9 @@ def _decision_msg(user: User) -> str:
 async def decision_claim(
     callback_flow: str, update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> str | None:
+    db = context.bot_data["database"]
     claim_id = extract_claim_id(context=context)
-    claim_obj = ClaimDTO(db=context.bot_data["database"])
+    claim_obj = ClaimDTO(db=db)
 
     if callback_flow == CallbackStateEnum.resolve.value:
         status = StatusEnum.resolved
@@ -33,5 +34,7 @@ async def decision_claim(
         decision=_decision_msg(update.effective_user),
         status=status,
     )
+    if status == StatusEnum.resolved:
+        await claim_obj.exp_resolved_claims(claim_id=claim_id)
 
     return R.string.thx_decision_claim

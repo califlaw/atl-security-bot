@@ -25,6 +25,7 @@
   "incorrect_phone": "Incorrect wrote phone number, repeat again",
   "ask_claim_platform": "What is platform? (lalafo.kg, instagram, etc...)",
   "attach_images": "Pls, attach images",
+  "claim_not_found": "Claim not found in database",
   "phone_not_found": "Phone number not found in base of claims",
   "dont_follow_links": "A thorough study will be done manually and you will receive a response from the bot!\n\nDo not go and do not enter your data on unknown sources!",
   "thx_finish_claim": "Thanks for yor attention in cyber-bot, our team already work on your claim",
