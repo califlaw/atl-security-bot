@@ -1,6 +1,5 @@
 from telegram import Update
-from telegram.ext import ContextTypes, ApplicationHandlerStop, \
-    ConversationHandler
+from telegram.ext import ContextTypes
 
 from src.core.templates import render_template
 from src.core.transliterate import R, effective_message
@@ -39,4 +38,4 @@ async def check_number_callback(
 
     await effective_message(update, message=R.string.thx_security_kg_alga)
 
-    return ConversationHandler.END
+    return HandleCheckPhoneEnum.STOP_CONVERSATION.value
