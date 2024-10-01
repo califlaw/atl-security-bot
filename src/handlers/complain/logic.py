@@ -130,8 +130,6 @@ async def fallback_exit_conv_callback(update: Update, _) -> int:
     query = update.callback_query
     await query.answer()
 
-    text = escape_markdown(
-        R.string.thx_finish_claim, version=2, entity_type=None
-    )
+    text = escape_markdown(R.string.unknown_command)
     await query.message.chat.send_message(text=text)
     return HandlerStateEnum.STOP_CONVERSATION.value

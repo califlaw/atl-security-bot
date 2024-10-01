@@ -29,8 +29,8 @@ class StartComplainHandler(BaseHandlerKlass):
 class ParsePhoneOrLinkWithAskPlatformHandler(BaseHandlerKlass):
     state: HandlerStateEnum = HandlerStateEnum.AWAIT_PHONE_OR_LINK
     filters: Type[MessageFilter] | None = (
-        filters.Entity(MessageEntity.PHONE_NUMBER)
-        & filters.Regex(simple_phone_regex)
+        filters.Entity(MessageEntity.PHONE_NUMBER)  # international format
+        | filters.Regex(simple_phone_regex)
     ) | (
         filters.Entity(MessageEntity.URL)
         & FlagPatternRegex(url_regex, flags=RegexFlag.IGNORECASE)

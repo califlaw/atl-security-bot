@@ -19,6 +19,7 @@
   "resolve_claim": "Resolve claim",
   "ask_help_group": "Ask help in group",
   "unknown_type": "Unknown type of claim",
+  "unknown_command": "Unknown command, please try repeat...",
   "join_community": "Join to oup chat-community",
   "enter_phone_or_link": "Enter phone number or link",
   "error_template": "Error message template, repeat later...",

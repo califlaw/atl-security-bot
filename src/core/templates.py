@@ -10,6 +10,7 @@ from src.core.logger import log_event
 from src.core.normalizer import type_normalizer
 from src.core.settings import BASE_DIR
 from src.core.transliterate import R
+from src.core.utils import v2_allowed_symbol_regex
 from src.dto.models import BaseRecord
 from src.handlers.enums import TemplateFiles
 
@@ -34,7 +35,9 @@ async def init_templates() -> None:
 
 
 def render_template(
-    name: str, mapping: Type[BaseRecord] | dict | None = None
+    name: str,
+    mapping: Type[BaseRecord] | dict | None = None,
+    entity_type: str | None = None,
 ) -> str:
     if name not in TemplateFiles._value2member_map_:  # noqa
         raise FileNotFoundError(f"Template {name} not found")
@@ -48,6 +51,8 @@ def render_template(
     except KeyError:
         text_template = R.string.error_template
 
-    _version = 2 if re.findall(r"_*\[]()~`>#+-=|{}.!", text_template) else 1
+    _version = 2 if re.findall(v2_allowed_symbol_regex, text_template) else 1
 
-    return escape_markdown(text_template, version=_version, entity_type=None)
+    return escape_markdown(
+        text_template, version=_version, entity_type=entity_type
+    )

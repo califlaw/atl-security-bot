@@ -4,7 +4,7 @@ from typing import AsyncGenerator
 
 import structlog
 from telegram import Bot
-from telegram.error import TelegramError
+from telegram.error import ChatMigrated, TelegramError
 
 from src.core.settings import settings
 from src.core.templates import render_template
@@ -26,7 +26,7 @@ async def notify_supergroup(
                 chat_id=settings.get("bot", "superGroupId"),
                 text=render_template(TemplateFiles.alarm, mapping=claim),
             )
+    except (ChatMigrated, TelegramError, NoOptionError) as e:
+        await logger.aexception(e)
 
-        yield bot
-    except (TelegramError, NoOptionError) as e:
-        await logger.aexception("Catch error from notify", e)
+    yield bot
