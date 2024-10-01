@@ -81,7 +81,14 @@ def type_normalizer(payload: Dict | Type[BaseRecord]) -> Dict:
                     settings.get("DEFAULT", "dateFormat")
                 )
 
-            case _ if _value_type in {"url", "phone"}:
+            case _ if not isinstance(
+                _value_type,
+                (  # hashable type is restrict to use `in` construct
+                    list,
+                    set,
+                    dict,
+                ),
+            ) and _value_type in {"url", "phone"}:
                 result["source"] = literal_types.get(_value_type)
 
             case bool():

@@ -51,6 +51,7 @@ def registration_handlers(application: Application) -> None:
             CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
         name="conversation_phone",
+        allow_reentry=True,
         persistent=False,
     )
 
@@ -74,6 +75,7 @@ def registration_handlers(application: Application) -> None:
             CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
         name="conversation_check_phone",
+        allow_reentry=True,
         persistent=False,
     )
 
@@ -95,6 +97,7 @@ def registration_handlers(application: Application) -> None:
         },
         fallbacks=[],
         name="conversation_check_link",
+        allow_reentry=True,
         persistent=False,
     )
 
