@@ -66,20 +66,35 @@ def type_normalizer(payload: Dict | Type[BaseRecord]) -> Dict:
     }
 
     for key, value in payload.items():  # type: str, Any
-        if isinstance(value, datetime.datetime):
-            if value.tzname() != "UTC":
-                utc_timezone = pytz.utc
-                value = utc_timezone.localize(value)
-            result[key] = value.astimezone(
-                tz=pytz.timezone(settings.get("DEFAULT", "timezone"))
-            ).strftime(settings.get("DEFAULT", "dateTimeFormat"))
-        elif isinstance(value, datetime.date):
-            result[key] = value.strftime(settings.get("DEFAULT", "dateFormat"))
-        elif reveal_type(value) == "url" or reveal_type(value) == "phone":
-            result["source"] = literal_types.get(reveal_type(value))
-        elif isinstance(value, bool):
-            result[key] = R.string.yes if value else R.string.no
-        else:
-            result[key] = value
+        _value_type = reveal_type(value)
+        match value:
+            case datetime.datetime():
+                if value.tzname() != "UTC":
+                    utc_timezone = pytz.utc
+                    value = utc_timezone.localize(value)
+                result[key] = value.astimezone(
+                    tz=pytz.timezone(settings.get("DEFAULT", "timezone"))
+                ).strftime(settings.get("DEFAULT", "dateTimeFormat"))
+
+            case datetime.date():
+                result[key] = value.strftime(
+                    settings.get("DEFAULT", "dateFormat")
+                )
+
+            case _ if not isinstance(
+                _value_type,
+                (  # hashable type is restrict to use `in` construct
+                    list,
+                    set,
+                    dict,
+                ),
+            ) and _value_type in {"url", "phone"}:
+                result["source"] = literal_types.get(_value_type)
+
+            case bool():
+                result[key] = R.string.yes if value else R.string.no
+
+            case _:
+                result[key] = value
 
     return result

@@ -24,12 +24,18 @@ async def start_manage_check_callback(
         ),
     ]
 
-    claim: Claim = await ClaimDTO(
+    claim: Claim | None = await ClaimDTO(
         db=context.bot_data["database"]
     ).get_accepted_claim()
-    context.user_data["claim"] = claim.id
 
-    await update.effective_chat.send_media_group(claim.images)
+    if not claim:
+        await effective_message(update, message=R.string.claim_not_found)
+        return
+
+    context.user_data["claim"] = claim.id  # set context of `claim`
+
+    if claim.images:
+        await update.effective_chat.send_media_group(claim.images)
     await effective_message(
         update,
         message=render_template(TemplateFiles.start_check, mapping=claim),

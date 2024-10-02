@@ -31,7 +31,7 @@ for _link_check_hdl in [ParseLinkCheckProcessHandler]:
 
 
 def registration_handlers(application: Application) -> None:
-    conversation_phone_handler = ConversationHandler(
+    conversation_fetch_source_handler = ConversationHandler(
         entry_points=[
             CommandHandler(
                 StartComplainHandler.command, StartComplainHandler.logic
@@ -50,7 +50,8 @@ def registration_handlers(application: Application) -> None:
         fallbacks=[
             CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
-        name="conversation_phone",
+        name="conversation_fetch_source",
+        allow_reentry=True,
         persistent=False,
     )
 
@@ -74,6 +75,7 @@ def registration_handlers(application: Application) -> None:
             CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
         name="conversation_check_phone",
+        allow_reentry=True,
         persistent=False,
     )
 
@@ -95,6 +97,7 @@ def registration_handlers(application: Application) -> None:
         },
         fallbacks=[],
         name="conversation_check_link",
+        allow_reentry=True,
         persistent=False,
     )
 
@@ -112,9 +115,9 @@ def registration_handlers(application: Application) -> None:
 
     application.add_handlers(
         [
+            conversation_fetch_source_handler,
             conversation_phone_check_handler,
             conversation_link_check_handler,
-            conversation_phone_handler,
             start_check_claim_handler,
             buttons_cb_handler,
             stat_total_handler,

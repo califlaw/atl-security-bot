@@ -38,4 +38,4 @@ def init_settings():
     return settings
 
 
-settings = init_settings()
+init_settings()

@@ -49,6 +49,7 @@ class Claim(BaseRecord):
     created_at: datetime
     type: Literal["phone", "url"]
     decision: str
+    author: UUID
     source: str = ""
     link: str | None = None
     phone: str | None = None
@@ -56,6 +57,8 @@ class Claim(BaseRecord):
 
 
 class Author(BaseRecord):
-    id: int
+    id: UUID
     full_name: str
-    tg_user_id: str
+    tg_user_id: int
+    tg_username: str
+    email: str | None

@@ -1,9 +1,12 @@
-from typing import Any, Callable, Coroutine, List, Type
+from re import RegexFlag
+from typing import Any, Callable, Coroutine, Type
 
-from telegram import Update
+from telegram import MessageEntity, Update
 from telegram.ext import ContextTypes, filters
 from telegram.ext.filters import MessageFilter
 
+from src.core.filters import FlagPatternRegex
+from src.core.utils import simple_phone_regex, url_regex
 from src.handlers.base import BaseHandlerKlass
 from src.handlers.complain.enums import HandlerStateEnum
 from src.handlers.complain.logic import (
@@ -24,8 +27,14 @@ class StartComplainHandler(BaseHandlerKlass):
 
 
 class ParsePhoneOrLinkWithAskPlatformHandler(BaseHandlerKlass):
-    command: str = ""
     state: HandlerStateEnum = HandlerStateEnum.AWAIT_PHONE_OR_LINK
+    filters: Type[MessageFilter] | None = (
+        filters.Entity(MessageEntity.PHONE_NUMBER)  # international format
+        | filters.Regex(simple_phone_regex)
+    ) | (
+        filters.Entity(MessageEntity.URL)
+        & FlagPatternRegex(url_regex, flags=RegexFlag.IGNORECASE)
+    )
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
         Coroutine[Any, Any, int],
@@ -33,7 +42,6 @@ class ParsePhoneOrLinkWithAskPlatformHandler(BaseHandlerKlass):
 
 
 class ParsePlatformAskPhotosHandler(BaseHandlerKlass):
-    command: str = ""
     state: HandlerStateEnum = HandlerStateEnum.AWAIT_PLATFORM
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
@@ -42,10 +50,9 @@ class ParsePlatformAskPhotosHandler(BaseHandlerKlass):
 
 
 class ParsePhotosOrStopConvHandler(BaseHandlerKlass):
-    command: str = ""
     state: HandlerStateEnum = HandlerStateEnum.AWAIT_PHOTOS
     filters: Type[MessageFilter] | None = (
-        filters.PHOTO | filters.VIDEO | filters.Document.IMAGE
+        filters.PHOTO | filters.Document.IMAGE
     )
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
@@ -54,7 +61,6 @@ class ParsePhotosOrStopConvHandler(BaseHandlerKlass):
 
 
 class ExitFallbackPhoneConvHandler(BaseHandlerKlass):
-    command: str = ""
     is_query: bool = True
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],

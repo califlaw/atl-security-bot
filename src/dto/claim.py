@@ -1,12 +1,13 @@
-from typing import Dict
+from typing import Dict, LiteralString
 from uuid import UUID
 
+from asyncpg import Record
 from telegram import User
 
 from src.core.normalizer import NormalizePhoneNumber
 from src.dto.author import AuthorDTO
 from src.dto.base import BaseDTO
-from src.dto.exceptions import MissedFieldsDTOError
+from src.dto.exceptions import MissedFieldsDTOError, NotFoundEntity
 from src.dto.image import ImageDTO
 from src.dto.models import Claim
 from src.handlers.enums import StatusEnum
@@ -67,17 +68,53 @@ class ClaimDTO(BaseDTO):
             record=Claim,
         )
 
+    async def exp_resolved_claims(self, claim_id: int) -> None:
+        try:
+            claim: Claim = await self.get_detail_claim(
+                status=StatusEnum.resolved, claim_id=claim_id
+            )
+            result_claims: Record = await self.db.execute_query(
+                """
+                select count(1) as _count 
+                from claims cl
+                where cl.author = %(author_id)s and status = 'resolved';
+                """,
+                params={"author_id": claim.author},
+            )
+            await self._author.inc_exp(
+                author_id=claim.author,
+                claims_cnt=result_claims.get("_count", 0),
+            )
+        except NotFoundEntity:
+            return
+
     async def get_detail_claim(
-        self, status: StatusEnum = StatusEnum.accepted
+        self,
+        status: StatusEnum = StatusEnum.accepted,
+        claim_id: int | None = None,
     ) -> Claim:
-        return await self.db.execute_query(  # noqa
+        params: Dict = {"status": status.value}
+        if claim_id:
+            sql: LiteralString = """
+                select * from claims where status = %(status)s and id = %(id)s
+                order by created_at limit 1;
             """
-            select * from claims where status = %(status)s 
-            order by created_at limit 1
-            """,
-            params={"status": status.value},
+            params["id"] = claim_id
+        else:
+            sql: LiteralString = """
+                select * from claims where status = %(status)s
+                order by created_at limit 1;
+            """
+
+        claim: Claim | None = await self.db.execute_query(  # noqa
+            sql,
+            params=params,
             record=Claim,
         )
+        if not claim:
+            raise NotFoundEntity
+
+        return claim
 
     async def set_status_claim(self, status: StatusEnum):
         assert self._id is not None, "Attribute _id is required, missed value!"
@@ -87,7 +124,7 @@ class ClaimDTO(BaseDTO):
 
         await self.db.execute_query(
             """
-            update claims set status = %(status)s where id = %(id)s
+            update claims set status = %(status)s where id = %(id)s;
             """,
             params={"id": self._id, "status": status.value},
         )
@@ -95,16 +132,18 @@ class ClaimDTO(BaseDTO):
     async def set_platform_claim(self, platform: str):
         await self.db.execute_query(
             """
-            update claims set platform = %(platform)s where id = %(id)s
+            update claims set platform = %(platform)s where id = %(id)s;
             """,
             params={"id": self._id, "platform": platform},
         )
 
-    async def get_accepted_claim(self):
-        claim: Claim = await self.get_detail_claim()
-        claim.images = await self._image.attach_images(claim_id=claim.id)
-
-        return claim
+    async def get_accepted_claim(self) -> Claim | None:
+        try:
+            claim: Claim = await self.get_detail_claim()
+            claim.images = await self._image.attach_images(claim_id=claim.id)
+            return claim
+        except NotFoundEntity:
+            return None
 
     async def resolve_claim(
         self, claim_id: int, decision: str, status: StatusEnum
@@ -114,7 +153,7 @@ class ClaimDTO(BaseDTO):
             """
             update claims set 
                 decision = %(decision)s 
-            where id = %(id)s
+            where id = %(id)s;
             """,
             params={"id": claim_id, "decision": decision},
         )
@@ -123,35 +162,52 @@ class ClaimDTO(BaseDTO):
     async def check_existed_claim(self, phone: str):
         return await self.db.execute_query(
             """
-            WITH
-            unique_claim_fraud_cases AS (
-                SELECT EXISTS (SELECT 1
-                               FROM claims
-                               WHERE phone = %(phone)s 
-                                    and type = 'phone') AS exists),
-            latest_claim_date AS (SELECT MAX(created_at) AS created_at
-                                  FROM claims
-                                  WHERE phone = %(phone)s
-                                    and type = 'phone'),
-            claim_platform AS (SELECT platform
-                               FROM claims
-                               WHERE phone = %(phone)s
-                                 and type = 'phone'
-                               GROUP BY platform
-                               ORDER BY count(1) DESC
-                               LIMIT 1),
-            total_claims AS (SELECT count(1) AS total
-                             FROM claims
-                             WHERE phone = %(phone)s
-                               and type = 'phone')
-            SELECT ucf.exists     AS _existed_claim,
+            with
+            unique_claim_fraud_cases as (
+                select EXISTS (
+                    select 1
+                    from claims
+                    where 
+                        phone = %(phone)s and 
+                        type = 'phone' and 
+                        status = 'resolved'::statusenum
+                ) AS exists
+            ),
+            latest_claim_date AS (
+                select MAX(created_at) AS created_at
+                from claims
+                where 
+                    phone = %(phone)s and 
+                    type = 'phone' and 
+                    status = 'resolved'::statusenum
+            ),
+            claim_platform AS (
+                select platform
+                from claims
+                where 
+                    phone = %(phone)s
+                    and type = 'phone'
+                    and status = 'resolved'::statusenum
+                group by platform
+                order by count(1) DESC
+                limit 1
+            ),
+            total_claims AS (
+                select count(1) AS total
+                from claims
+                where 
+                    phone = %(phone)s and 
+                    type = 'phone' and 
+                    status = 'resolved'::statusenum
+            )
+            select ucf.exists     AS _existed_claim,
                    lid.created_at AS _last_claim,
                    fp.platform    AS _platform_claim,
                    tc.total       AS _total_claims
-            FROM unique_claim_fraud_cases ucf
-                     CROSS JOIN latest_claim_date lid
-                     CROSS JOIN claim_platform fp
-                     CROSS JOIN total_claims tc;
+            from unique_claim_fraud_cases ucf
+                     cross join latest_claim_date lid
+                     cross join claim_platform fp
+                     cross join total_claims tc;
             """,
             params={"phone": phone},
         )
@@ -170,28 +226,35 @@ class ClaimDTO(BaseDTO):
         _platforms_records = (
             await self.db.execute_query(
                 """
-            SELECT c2.platform
-            FROM claims c1
-            JOIN claims c2 ON c1.id <> c2.id
-            WHERE similarity(c1.platform, c2.platform) >= 0.8
-            GROUP BY 
-                c2.platform, c1.platform, similarity(c1.platform, c2.platform);
-            """
+                select c2.platform
+                from claims c1
+                join claims c2 on c1.id <> c2.id
+                where similarity(c1.platform, c2.platform) >= 0.8
+                group by 
+                    c2.platform, c1.platform, 
+                    similarity(c1.platform, c2.platform);
+                """
             )
             or []
         )
+        if isinstance(_platforms_records, Record):
+            # type cast record to list objects, on the way fetch one row
+            _platforms_records = [_platforms_records]
         platforms = await self.db.execute_query(
-            " UNION ALL ".join(  # noqa
+            " union all ".join(  # noqa
                 f"""
-                    SELECT '{record['platform']}' as _name, count(*) as _counter
-                    FROM claims
-                    WHERE 
+                    select '{record['platform']}' as _name, count(*) as _counter
+                    from claims
+                    where 
                         similarity(platform, '{record['platform']}') > 0.7 and 
-                        status = 'resolved'
+                        status = 'resolved'::statusenum
                     """
                 for record in _platforms_records
             )
         )
+        if isinstance(platforms, Record):
+            # type cast record to list objects, on the way fetch one row
+            platforms = [platforms]
 
         result.update(totals)
         result["platforms"] = platforms or []
@@ -205,7 +268,7 @@ class ClaimDTO(BaseDTO):
                 cm.link as link, m.type as type
             from claims cm
                      join malware m on cm.id = m.claim_id
-            where cm.link = %(link)s;
+            where cm.link = %(link)s and cm.status = 'resolved'::statusenum;
             """,
             params={"link": link},
             record=Claim,

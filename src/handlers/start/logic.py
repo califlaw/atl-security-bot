@@ -1,5 +1,5 @@
 import structlog
-from telegram import InlineKeyboardButton, Update
+from telegram import InlineKeyboardButton, MessageEntity, Update
 
 from src.core.settings import settings
 from src.core.templates import render_template
@@ -20,6 +20,10 @@ async def start_callback(update: Update, _) -> None:
 
     await effective_message(
         update,
-        message=render_template(TemplateFiles.start),
+        message=render_template(
+            TemplateFiles.start,
+            mapping={"help_group": settings.get("bot", "helpGroupName")},
+            entity_type=MessageEntity.TEXT_LINK,
+        ),
         reply_markup=make_reply_markup(button_list=button_list),
     )
