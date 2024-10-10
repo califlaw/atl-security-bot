@@ -1,5 +1,6 @@
 from collections import defaultdict
-from typing import Type
+from enum import Enum
+from typing import Dict, List, Type
 
 from telegram.ext import (
     Application,
@@ -11,10 +12,19 @@ from telegram.ext import (
 
 from . import *
 
+_start_conv_handlers = defaultdict()
 _store_claim_handlers = defaultdict()
 
 _check_link_handlers = defaultdict()
 _check_phone_handlers = defaultdict()
+
+
+# register handlers in store dictionary
+for _start_hdl in [
+    ButtonStartCallbacksHandler,
+    AskStartUserPhoneOrSkipHandler,
+]:
+    _start_conv_handlers[_start_hdl.state] = _start_hdl
 
 for _phone_hdl in [
     ParsePhoneOrLinkWithAskPlatformHandler,
@@ -30,23 +40,39 @@ for _link_check_hdl in [ParseLinkCheckProcessHandler]:
     _check_link_handlers[_link_check_hdl.state] = _link_check_hdl
 
 
+def _prepare_states(
+    store: Dict[Enum, Type[BaseHandlerKlass]],
+) -> Dict[int, List[MessageHandler | CallbackQueryHandler]]:
+    return {
+        # for correctly register query handler without enum state (will None)
+        getattr(state, "value", None): [
+            CallbackQueryHandler(callback=klass.logic)
+            if klass.is_query and not klass.filters
+            else MessageHandler(filters=klass.filters, callback=klass.logic)
+        ]  # type: klass: Type[BaseHandlerKlass]
+        for (state, klass) in store.items()
+    }
+
+
 def registration_handlers(application: Application) -> None:
-    conversation_fetch_source_handler = ConversationHandler(
+    conversation_start_conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler(
                 StartComplainHandler.command, StartComplainHandler.logic
             )
         ],
-        states={
-            state.value: [
-                CallbackQueryHandler(callback=klass.logic)
-                if klass.is_query and not klass.filters
-                else MessageHandler(
-                    filters=klass.filters, callback=klass.logic
-                )
-            ]  # type: klass: Type[BaseHandlerKlass]
-            for (state, klass) in _store_claim_handlers.items()
-        },
+        states=_prepare_states(store=_start_conv_handlers),
+        fallbacks=[],
+        name="conversation_start_main",
+        allow_reentry=False,
+        persistent=False,
+    )
+
+    conversation_fetch_source_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler(StartHandler.command, StartHandler.logic)
+        ],
+        states=_prepare_states(store=_store_claim_handlers),
         fallbacks=[
             CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
@@ -61,16 +87,7 @@ def registration_handlers(application: Application) -> None:
                 CheckNumberHandler.command, CheckNumberHandler.logic
             )
         ],
-        states={
-            state.value: [
-                CallbackQueryHandler(callback=klass.logic)
-                if klass.is_query and not klass.filters
-                else MessageHandler(
-                    filters=klass.filters, callback=klass.logic
-                )
-            ]  # type: klass: Type[BaseHandlerKlass]
-            for (state, klass) in _check_phone_handlers.items()
-        },
+        states=_prepare_states(store=_check_phone_handlers),
         fallbacks=[
             CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
@@ -85,16 +102,7 @@ def registration_handlers(application: Application) -> None:
                 StartCheckLinkHandler.command, StartCheckLinkHandler.logic
             )
         ],
-        states={
-            state.value: [
-                CallbackQueryHandler(callback=klass.logic)
-                if klass.is_query and not klass.filters
-                else MessageHandler(
-                    filters=klass.filters, callback=klass.logic
-                )
-            ]  # type: klass: Type[BaseHandlerKlass]
-            for (state, klass) in _check_link_handlers.items()
-        },
+        states=_prepare_states(store=_check_link_handlers),
         fallbacks=[],
         name="conversation_check_link",
         allow_reentry=True,
@@ -102,7 +110,6 @@ def registration_handlers(application: Application) -> None:
     )
 
     help_handler = CommandHandler(HelpHandler.command, HelpHandler.logic)
-    start_handler = CommandHandler(StartHandler.command, StartHandler.logic)
 
     # manager commands
     start_check_claim_handler = CommandHandler(
@@ -118,10 +125,10 @@ def registration_handlers(application: Application) -> None:
             conversation_fetch_source_handler,
             conversation_phone_check_handler,
             conversation_link_check_handler,
+            conversation_start_conv_handler,
             start_check_claim_handler,
             buttons_cb_handler,
             stat_total_handler,
-            start_handler,
             help_handler,
         ]
     )

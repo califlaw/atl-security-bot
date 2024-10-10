@@ -11,9 +11,9 @@ from telegram import Bot
 from telegram.constants import ChatAction
 
 simple_phone_regex = r"^(0|7|8)\d+"
-v2_allowed_symbol_regex = r"[_*\\\[\]~`>#+=|{}!@]"
+v2_allowed_symbol_regex = r"[_*\\\[\]~`>№#+=|{}!@]"
 url_regex = (
-    r"^(https?|ftp)://"
+    r"^((https?|smb|dns)://)?"
     r"([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}"
     r"(:\d+)?"
     r"(/[-a-zA-Z0-9@:%._+~#=]*)*"

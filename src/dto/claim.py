@@ -47,7 +47,7 @@ class ClaimDTO(BaseDTO):
             raise MissedFieldsDTOError(f"Missed DTO fields: {_missed_fields}")
 
         payload["author"]: UUID = (
-            await self._author.set_author(author=author)
+            await self._author.create_author(author=author)
         ).id
 
         # phone field normalization value

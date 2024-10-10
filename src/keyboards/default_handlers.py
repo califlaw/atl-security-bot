@@ -49,7 +49,7 @@ class LanguageCommands:
 
 
 async def set_default_commands(_application: Application):
-    _bot: Bot = _application.bot
+    _bot: Bot = _application.bot  # noqa
     l_commands = LanguageCommands()
 
     async def _remove_default_commands() -> None:

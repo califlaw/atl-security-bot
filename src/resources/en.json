@@ -1,6 +1,6 @@
 {
-  "no": "No",
-  "yes": "Yes",
+  "no": "\u274C",
+  "yes": "\u2705",
   "link": "Link",
   "phone": "Phone number",
   "ask_help": "\uD83C\uDD98 Ask a help",
@@ -12,7 +12,8 @@
   "total_query": "\ud83d\udcca Number of complaints for all time",
   "lost_claim_id": "Number of claim was lost :(",
   "enter_link": "Enter link",
-  "enter_phone": "Enter phone number",
+  "enter_email": "Enter please your e-mail address",
+  "enter_phone": "Enter phone number in format 0555999000111",
   "add_claim_link": "Add claim of link",
   "add_claim_phone": "Add claim of phone",
   "decline_claim": "Decline claim",
@@ -31,5 +32,6 @@
   "dont_follow_links": "A thorough study will be done manually and you will receive a response from the bot!\n\nDo not go and do not enter your data on unknown sources!",
   "thx_finish_claim": "Thanks for yor attention in cyber-bot, our team already work on your claim",
   "thx_decision_claim": "Thanks for decision claim!",
+  "thx_will_on_call": "Thanks! Now we'll on the call!",
   "thx_security_kg_alga": "Thank you for your contribution to the safe cyberspace of Kyrgyzstan! Alga!"
 }

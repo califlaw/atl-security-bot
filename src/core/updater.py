@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Awaitable, Final, List
 
 from telegram import Update, constants
@@ -27,4 +28,5 @@ class UpdProcessorMiddleware(SimpleUpdateProcessor):
             return
 
         R.string.set_language(language=update.effective_user.language_code)
-        await coroutine
+        if coroutine and asyncio.iscoroutine(coroutine):
+            await coroutine

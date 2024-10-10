@@ -9,6 +9,7 @@ dateFormat = %%d-%%m-%%Y
 dateTimeFormat = %%d-%%m-%%Y %%H:%%M
 
 [bot]
+botName = Альтрон
 notifyNewClaim = false
 moderateChatId =
 ; token can fetch using -BotFather- on your tg app

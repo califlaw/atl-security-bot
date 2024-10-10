@@ -15,6 +15,10 @@ from .complain.klass import (
     StartComplainHandler,
 )
 from .help.klass import HelpHandler
-from .start.klass import StartHandler
+from .start.klass import (
+    AskStartUserPhoneOrSkipHandler,
+    ButtonStartCallbacksHandler,
+    StartHandler,
+)
 from .start_check.klass import StartCheckHandler
 from .total.klass import TotalHandler

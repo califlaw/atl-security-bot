@@ -37,7 +37,7 @@ class AuthorDTO(BaseDTO):
 
         return result
 
-    async def set_author(self, author: User) -> Author:
+    async def create_author(self, author: User) -> Author:
         try:
             if _author := await self.try_find_author(author=author):
                 return _author
@@ -58,18 +58,21 @@ class AuthorDTO(BaseDTO):
                 record=Author,
             )
 
+    async def set_phone(self, phone: str) -> bool:
+        pass
+
     async def inc_exp(self, author_id: UUID, claims_cnt: int = 0):
         author: Author = await self.get_by_id(_id=author_id)
 
         match claims_cnt:
             case cnt if 0 < cnt <= 5:
-                exp = ExperienceEnum.simple
+                exp = ExperienceEnum.newbie
             case cnt if 5 < cnt <= 10:
-                exp = ExperienceEnum.modern
-            case cnt if 10 < cnt <= 50:
                 exp = ExperienceEnum.advanced
+            case cnt if 10 < cnt <= 50:
+                exp = ExperienceEnum.expert
             case _:
-                exp = ExperienceEnum.simple
+                exp = ExperienceEnum.newbie
 
         await self.db.execute_query(
             """
@@ -85,5 +88,5 @@ class AuthorDTO(BaseDTO):
             await promote_user(
                 author_id=author_id,
                 author_obj=self,
-                custom_title=AuthorRankEnum.pro.value,  # noqa
+                custom_title=AuthorRankEnum.squire.value,  # noqa
             )

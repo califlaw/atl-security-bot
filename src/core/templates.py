@@ -47,11 +47,14 @@ def render_template(
     try:
         if not mapping:
             mapping = {}
-        text_template = _t.format_map(type_normalizer(mapping))
-    except KeyError:
+        mapper_values = type_normalizer(mapping)
+        logger.debug("Prepared values for rendering: %s", mapper_values)
+        text_template = _t.format_map(mapper_values)
+    except KeyError as e:
+        logger.exception("Error of rendering template %s", e)
         text_template = R.string.error_template
 
-    _version = 2 if re.findall(v2_allowed_symbol_regex, text_template) else 1
+    _version = 1 if re.findall(v2_allowed_symbol_regex, text_template) else 2
 
     return escape_markdown(
         text_template, version=_version, entity_type=entity_type

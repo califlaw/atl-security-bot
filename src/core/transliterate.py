@@ -3,7 +3,7 @@ import os
 
 import aiofiles
 import structlog
-from telegram import Update
+from telegram import InlineKeyboardMarkup, Update
 from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
@@ -66,9 +66,16 @@ async def load_strings():
 
 
 async def effective_message(
-    update: Update, message: str, is_reply: bool = False, **kwargs
+    update: Update,
+    message: str,
+    is_reply: bool = False,
+    reply_markup: InlineKeyboardMarkup | None = None,
+    **kwargs,
 ) -> None:
     text = escape_markdown(message, version=2, entity_type=None)
+
+    if reply_markup:
+        kwargs["reply_markup"] = reply_markup
 
     if is_reply:
         await update.message.reply_text(text=text, **kwargs)
