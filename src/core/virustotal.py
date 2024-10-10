@@ -5,6 +5,7 @@ from urllib.parse import urlencode, urljoin
 import httpx
 
 from src.core.settings import settings
+from src.core.transliterate import R
 from src.core.utils import decode_url_b64, serialize_orjson
 
 
@@ -16,6 +17,18 @@ class VirusTotal:
         "X-Apikey": settings.get("virus.total", "token"),
         "Content-Type": "application/x-www-form-urlencoded",
     }
+
+    @staticmethod
+    def translate_type(value: str, default: str | None = None) -> str:
+        return {
+            "confirmed-timeout": R.string.analysing_conf_timeout,
+            "failure": R.string.analysing_failure,
+            "harmless": R.string.analysing_harmless,
+            "malicious": R.string.analysing_malicious,
+            "suspicious": R.string.analysing_suspicious,
+            "timeout": R.string.analysing_timeout,
+            "undetected": R.string.analysing_undetected,
+        }.get(value, default or R.string.analysing_undetected)
 
     async def request_query(
         self,

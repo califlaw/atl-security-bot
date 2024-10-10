@@ -11,7 +11,6 @@ dateTimeFormat = %%d-%%m-%%Y %%H:%%M
 [bot]
 botName = Альтрон
 notifyNewClaim = false
-moderateChatId =
 ; token can fetch using -BotFather- on your tg app
 token =
 ; operators allowed only as <int> values, joined by comma separate

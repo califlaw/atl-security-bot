@@ -13,13 +13,12 @@
   "lost_claim_id": "Number of claim was lost :(",
   "enter_link": "Enter link",
   "enter_email": "Enter please your e-mail address",
-  "enter_phone": "Enter phone number in format 0555999000111",
+  "enter_phone": "Enter phone number in format 0555000111",
   "add_claim_link": "Add claim of link",
   "add_claim_phone": "Add claim of phone",
   "decline_claim": "Decline claim",
   "resolve_claim": "Resolve claim",
   "ask_help_group": "Ask help in group",
-  "unknown_type": "Unknown type of claim",
   "unknown_command": "Unknown command, please try repeat...",
   "join_community": "Join to oup chat-community",
   "enter_phone_or_link": "Enter phone number or link",
@@ -33,5 +32,12 @@
   "thx_finish_claim": "Thanks for yor attention in cyber-bot, our team already work on your claim",
   "thx_decision_claim": "Thanks for decision claim!",
   "thx_will_on_call": "Thanks! Now we'll on the call!",
-  "thx_security_kg_alga": "Thank you for your contribution to the safe cyberspace of Kyrgyzstan! Alga!"
+  "thx_security_kg_alga": "Thank you for your contribution to the safe cyberspace of Kyrgyzstan! Alga!",
+  "analysing_conf_timeout": "Configuration timeout",
+  "analysing_failure": "Analysis failure",
+  "analysing_harmless": "Analysis result: harmless",
+  "analysing_malicious": "Analysis result: malicious",
+  "analysing_suspicious": "Analysis result: suspicious",
+  "analysing_timeout": "Analysis completed due to timeout",
+  "analysing_undetected": "Undetected"
 }
