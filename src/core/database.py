@@ -61,26 +61,26 @@ class DBPool:
         params: Dict[str, Any] | None = None,
         record: Type[asyncpg.Record] = asyncpg.Record,
     ) -> asyncpg.Record | List[asyncpg.Record] | None:
-        _query, positional_args = self._format2psql(
+        sql_query, positional_args = self._format2psql(
             query=query, named_args=params
         )
         if settings.getboolean("database", "debug"):  # type: bool
             await log_event(
                 logger,
                 level=logging.DEBUG,
-                message=f"Prepared SQL query: {_query}",
+                message=f"Prepared SQL query: {sql_query}",
                 payload={"args": positional_args},
             )
 
         async with self._pool.acquire() as conn:  # type: asyncpg.Connection
             try:
-                if "insert" in _query or "update" in _query:
+                if "insert" in sql_query or "update" in sql_query:
                     results: List[asyncpg.Record] | None = await conn.fetchrow(
-                        _query, *positional_args, record_class=record
+                        sql_query, *positional_args, record_class=record
                     )
                 else:
                     results: List[asyncpg.Record] | None = await conn.fetch(
-                        _query,
+                        sql_query,
                         *positional_args,
                         record_class=record,
                     )
