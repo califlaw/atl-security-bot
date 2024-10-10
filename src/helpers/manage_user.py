@@ -14,11 +14,13 @@ async def promote_user(
     author_obj: "AuthorDTO",
     custom_title: AuthorRankEnum | str | None = None,
 ) -> bool:
+    user_id: int | None = None
     chat_id = settings.getint("bot", "superGroupId", fallback=None)
     if not chat_id:
         return False
 
-    user_id = (await author_obj.get_by_id(_id=author_id)).tg_user_id
+    if author := await author_obj.get_by_id(_id=author_id):
+        user_id = author.tg_user_id
 
     with contextlib.suppress(TelegramError, ChatMigrated):
         async with notify_supergroup() as bot:  # type: Bot
