@@ -17,6 +17,7 @@ token =
 operators =
 superGroupId =
 helpGroupName =
+topicNotifyId =
 communityGroupLink =
 maxConcurrent = 256
 

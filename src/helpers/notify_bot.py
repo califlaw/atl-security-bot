@@ -24,9 +24,16 @@ async def notify_supergroup(
         if claim and settings.getboolean(
             "bot", "notifyNewClaim", fallback=False
         ):
+            params = {}
+            if topic_id := settings.getint(
+                "bot", "topicNotifyId", fallback=None
+            ):
+                params["message_thread_id"] = topic_id
+
             await bot.send_message(
                 chat_id=settings.get("bot", "superGroupId"),
                 text=render_template(TemplateFiles.alarm, mapping=claim),
+                **params,
             )
     except (ChatMigrated, TelegramError, NoOptionError) as e:
         await logger.aexception("Telegram has sent error: %s", e)
