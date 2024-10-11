@@ -50,7 +50,6 @@ class Claim(BaseRecord):
     type: Literal["phone", "url"]
     decision: str
     author: UUID
-    source: str = ""
     link: str | None = None
     phone: str | None = None
     images: Sequence[Image] = []

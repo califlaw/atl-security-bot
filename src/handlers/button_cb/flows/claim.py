@@ -1,11 +1,13 @@
-from telegram import Update, User
+from telegram import Bot, Update, User
 from telegram.ext import ContextTypes
 
 from src.core.transliterate import R
 from src.dto.claim import ClaimDTO
+from src.dto.models import Claim
 from src.handlers.button_cb.enums import CallbackStateEnum
 from src.handlers.enums import StatusEnum
 from src.handlers.helpers import extract_claim_id
+from src.helpers.notify_bot import notify_supergroup
 
 
 def _decision_msg(user: User) -> str:
@@ -34,7 +36,10 @@ async def decision_claim(
         decision=_decision_msg(update.effective_user),
         status=status,
     )
+
     if status == StatusEnum.resolved:
-        await claim_obj.exp_resolved_claims(claim_id=claim_id)
+        claim: Claim = await claim_obj.get_detail_claim(status, claim_id)
+        async with notify_supergroup(claim=claim):  # type: Bot
+            await claim_obj.exp_resolved_claims(claim=claim)
 
     return R.string.thx_decision_claim

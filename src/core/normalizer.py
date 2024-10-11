@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, Type, reveal_type
+from typing import Any, Dict, Type
 
 import phonenumbers
 import pytz
@@ -61,12 +61,11 @@ class NormalizePhoneNumber:
 def type_normalizer(payload: Dict | Type[BaseRecord]) -> Dict:
     result = {}
     literal_types = {
-        "url": R.string.link,
+        "link": R.string.link,
         "phone": R.string.phone,
     }
 
     for key, value in payload.items():  # type: str, Any
-        _value_type = reveal_type(value)
         match value:
             case datetime.datetime():
                 if value.tzname() != "UTC":
@@ -81,18 +80,11 @@ def type_normalizer(payload: Dict | Type[BaseRecord]) -> Dict:
                     settings.get("DEFAULT", "dateFormat")
                 )
 
-            case _ if not isinstance(
-                _value_type,
-                (  # hashable type is restrict to use `in` construct
-                    list,
-                    set,
-                    dict,
-                ),
-            ) and _value_type in {"url", "phone"}:
-                result["source"] = literal_types.get(_value_type)
-
             case bool():
                 result[key] = R.string.yes if value else R.string.no
+
+            case _ if key == "type" and value in {"link", "phone"}:
+                result["source"] = literal_types.get(value)
 
             case _:
                 result[key] = value

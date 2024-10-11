@@ -1,7 +1,7 @@
 from typing import Tuple
 
 import structlog
-from telegram import Bot, Document, PhotoSize, Update
+from telegram import Document, PhotoSize, Update
 from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
 
@@ -15,7 +15,6 @@ from src.dto.models import Claim
 from src.handlers.complain.enums import HandlerStateEnum
 from src.handlers.exceptions import ExtractClaimIDError
 from src.handlers.helpers import extract_claim_id
-from src.helpers.notify_bot import notify_supergroup
 
 logger = structlog.stdlib.get_logger("handlers.complain")
 
@@ -66,8 +65,6 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     await effective_message(
         update, message=R.string.ask_claim_platform, is_reply=True
     )
-    async with notify_supergroup(claim=claim):  # type: Bot
-        pass
 
     return HandlerStateEnum.AWAIT_PLATFORM.value
 

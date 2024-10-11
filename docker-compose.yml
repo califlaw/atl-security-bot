@@ -8,6 +8,6 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./attachments:/opt/app/attachments/
-      - ./bot.config.ini:/opt/app/bot.config.ini
+      - ./bot.config.ini:/opt/app/bot.config.ini:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"

@@ -68,11 +68,13 @@ class ClaimDTO(BaseDTO):
             record=Claim,
         )
 
-    async def exp_resolved_claims(self, claim_id: int) -> None:
+    async def exp_resolved_claims(self, claim: Claim | int) -> None:
         try:
-            claim: Claim = await self.get_detail_claim(
-                status=StatusEnum.resolved, claim_id=claim_id
-            )
+            if isinstance(claim, int):
+                claim: Claim = await self.get_detail_claim(
+                    status=StatusEnum.resolved, claim_id=claim
+                )
+
             result_claims: Record = await self.db.execute_query(
                 """
                 select count(1) as _count 
