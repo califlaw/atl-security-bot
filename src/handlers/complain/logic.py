@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List, Tuple
 
 import structlog
 from telegram import Document, PhotoSize, Update
@@ -7,7 +7,7 @@ from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
 from src.core.transliterate import R, effective_message
-from src.core.utils import create_bg_task, get_link
+from src.core.utils import create_bg_task, get_link, get_safe_last_element
 from src.core.virustotal import VirusTotal
 from src.dto.claim import ClaimDTO, normalizer
 from src.dto.image import ImageDTO
@@ -121,9 +121,9 @@ async def complain_parse_platform_ask_photos_callback(
 async def complain_parse_photos_or_stop_callback(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    images: Tuple[PhotoSize, ...] = update.message.photo
+    images: Tuple[PhotoSize, ...] = get_safe_last_element(update.message.photo)
     if not images:
-        images: Document = update.message.document
+        images: List[Document] = [update.message.document]
 
     try:
         claim_id = extract_claim_id(context=context)

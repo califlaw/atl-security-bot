@@ -4,7 +4,7 @@ import random
 import re
 import string
 from asyncio import AbstractEventLoop, Task
-from typing import Any, Callable, Coroutine, Dict
+from typing import Any, Callable, Coroutine, Dict, List, Sequence
 
 from orjson import orjson
 from telegram import Bot
@@ -30,6 +30,12 @@ def unpack_args(args):
             args.items() if isinstance(args, dict) else args[0].items()
         )
     }
+
+
+def get_safe_last_element(items: List[Any] | Sequence[Any]):
+    if items:
+        return [items[-1]]
+    return []
 
 
 def async_partial(

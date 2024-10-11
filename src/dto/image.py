@@ -5,7 +5,7 @@ from typing import List, Sequence, Tuple
 import aiofiles
 from telegram import Document, File, InputMediaPhoto, PhotoSize
 
-from src.core.settings import BASE_DIR, settings
+from src.core.settings import BASE_DIR
 from src.dto.base import BaseDTO
 from src.dto.models import Image
 
@@ -53,15 +53,7 @@ class ImageDTO(BaseDTO):
         img_claim_folder = self.get_attachment_path()
         os.makedirs(img_claim_folder, exist_ok=True)
 
-        if isinstance(images, Document):
-            images = [images]  # strong case to list items
-
         for image in images:
-            if hasattr(image, "height") and image.height <= settings.getint(
-                "DEFAULT", "minHeightImage"
-            ):
-                continue
-
             img_path = os.path.join(
                 img_claim_folder,
                 getattr(image, "file_name", image.file_unique_id + ".jpg"),

@@ -3,7 +3,6 @@ jsonLog = true
 loggingLevel = INFO
 sentryDsn =
 environment = dev
-minHeightImage = 400
 timezone = Asia/Bishkek
 dateFormat = %%d-%%m-%%Y
 dateTimeFormat = %%d-%%m-%%Y %%H:%%M
