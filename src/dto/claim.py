@@ -22,8 +22,8 @@ class ClaimDTO(BaseDTO):
         super().__init__(**kwargs)
 
         # init nested DTO models
-        self._image = ImageDTO(db=self.db)
-        self._author = AuthorDTO(db=self.db)
+        self.image = ImageDTO(db=self.db)
+        self.author = AuthorDTO(db=self.db)
 
     async def initiation_claim(
         self,
@@ -47,7 +47,7 @@ class ClaimDTO(BaseDTO):
             raise MissedFieldsDTOError(f"Missed DTO fields: {_missed_fields}")
 
         payload["author"]: UUID = (
-            await self._author.create_author(author=author)
+            await self.author.create_author(author=author)
         ).id
 
         # phone field normalization value
@@ -83,7 +83,7 @@ class ClaimDTO(BaseDTO):
                 """,
                 params={"author_id": claim.author},
             )
-            await self._author.inc_exp(
+            await self.author.inc_exp(
                 author_id=claim.author,
                 claims_cnt=result_claims.get("_count", 0),
             )
@@ -142,7 +142,7 @@ class ClaimDTO(BaseDTO):
     async def get_accepted_claim(self) -> Claim | None:
         try:
             claim: Claim = await self.get_detail_claim()
-            claim.images = await self._image.attach_images(claim_id=claim.id)
+            claim.images = await self.image.attach_images(claim_id=claim.id)
             return claim
         except NotFoundEntity:
             return None

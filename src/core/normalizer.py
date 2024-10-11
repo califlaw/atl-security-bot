@@ -84,6 +84,7 @@ def type_normalizer(payload: Dict | Type[BaseRecord]) -> Dict:
                 result[key] = R.string.yes if value else R.string.no
 
             case _ if key == "type" and value in {"link", "phone"}:
+                result["type"] = value
                 result["source"] = literal_types.get(value)
 
             case _:

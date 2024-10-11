@@ -51,7 +51,7 @@ def render_template(
         logger.debug("Prepared values for rendering: %s", mapper_values)
         text_template = _t.format_map(mapper_values)
     except KeyError as e:
-        logger.exception(f"Error of rendering template {_t} with var: %s", e)
+        logger.exception(f"Error of rendering template {name} with var: %s", e)
         text_template = R.string.error_template
 
     _version = 1 if re.findall(v2_allowed_symbol_regex, text_template) else 2

@@ -47,7 +47,7 @@ class Claim(BaseRecord):
     id: int
     status: StatusEnum
     created_at: datetime
-    type: Literal["phone", "url"]
+    type: Literal["phone", "link"]
     decision: str
     author: UUID
     link: str | None = None
