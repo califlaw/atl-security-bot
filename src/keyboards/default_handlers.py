@@ -32,6 +32,7 @@ class LanguageCommands:
                     "help": R.string.ask_help,
                     "start": R.string.start_claim_process,
                     "checknumber": R.string.checknumber_query,
+                    "checkusername": R.string.checkusername_query,
                     "checklink": R.string.checklink_query,
                     "complain": R.string.complain_start,
                 }

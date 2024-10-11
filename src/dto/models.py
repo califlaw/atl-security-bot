@@ -52,6 +52,7 @@ class Claim(BaseRecord):
     author: UUID
     link: str | None = None
     phone: str | None = None
+    username: str | None = None
     images: Sequence[Image] = []
 
 

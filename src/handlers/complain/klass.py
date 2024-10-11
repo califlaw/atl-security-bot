@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes, filters
 from telegram.ext.filters import MessageFilter
 
 from src.core.filters import FlagPatternRegex
-from src.core.utils import simple_phone_regex, url_regex
+from src.core.utils import simple_phone_regex, url_regex, username_regex
 from src.handlers.base import BaseHandlerKlass
 from src.handlers.complain.enums import HandlerStateEnum
 from src.handlers.complain.logic import (
@@ -29,11 +29,18 @@ class StartComplainHandler(BaseHandlerKlass):
 class ParsePhoneOrLinkWithAskPlatformHandler(BaseHandlerKlass):
     state: HandlerStateEnum = HandlerStateEnum.AWAIT_PHONE_OR_LINK
     filters: Type[MessageFilter] | None = (
-        filters.Entity(MessageEntity.PHONE_NUMBER)  # international format
-        | filters.Regex(simple_phone_regex)
-    ) | (
-        filters.Entity(MessageEntity.URL)
-        & FlagPatternRegex(url_regex, flags=RegexFlag.IGNORECASE)
+        (
+            filters.Entity(MessageEntity.PHONE_NUMBER)  # international format
+            | filters.Regex(simple_phone_regex)
+        )
+        | (
+            filters.Entity(MessageEntity.MENTION)
+            & FlagPatternRegex(username_regex, flags=RegexFlag.IGNORECASE)
+        )
+        | (
+            filters.Entity(MessageEntity.URL)
+            & FlagPatternRegex(url_regex, flags=RegexFlag.IGNORECASE)
+        )
     )
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],

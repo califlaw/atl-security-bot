@@ -17,6 +17,7 @@ _store_claim_handlers = defaultdict()
 
 _check_link_handlers = defaultdict()
 _check_phone_handlers = defaultdict()
+_check_username_handlers = defaultdict()
 
 
 # register handlers in store dictionary
@@ -35,6 +36,9 @@ for _phone_hdl in [
 
 for _phone_check_hdl in [ParseCheckPhoneHandler]:
     _check_phone_handlers[_phone_check_hdl.state] = _phone_check_hdl
+
+for _username_check_hdl in [ParseCheckUsernameHandler]:
+    _check_username_handlers[_username_check_hdl.state] = _username_check_hdl
 
 for _link_check_hdl in [ParseLinkCheckProcessHandler]:
     _check_link_handlers[_link_check_hdl.state] = _link_check_hdl
@@ -57,9 +61,7 @@ def _prepare_states(
 def registration_handlers(application: Application) -> None:
     conversation_start_conv_handler = ConversationHandler(
         entry_points=[
-            CommandHandler(
-                StartComplainHandler.command, StartComplainHandler.logic
-            )
+            CommandHandler(StartHandler.command, StartHandler.logic)
         ],
         states=_prepare_states(store=_start_conv_handlers),
         fallbacks=[],
@@ -70,7 +72,9 @@ def registration_handlers(application: Application) -> None:
 
     conversation_fetch_source_handler = ConversationHandler(
         entry_points=[
-            CommandHandler(StartHandler.command, StartHandler.logic)
+            CommandHandler(
+                StartComplainHandler.command, StartComplainHandler.logic
+            )
         ],
         states=_prepare_states(store=_store_claim_handlers),
         fallbacks=[
@@ -92,6 +96,21 @@ def registration_handlers(application: Application) -> None:
             CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
         name="conversation_check_phone",
+        allow_reentry=True,
+        persistent=False,
+    )
+
+    conversation_instagram_check_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler(
+                CheckUsernameHandler.command, CheckUsernameHandler.logic
+            )
+        ],
+        states=_prepare_states(store=_check_username_handlers),
+        fallbacks=[
+            CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
+        ],
+        name="conversation_check_username",
         allow_reentry=True,
         persistent=False,
     )
@@ -122,6 +141,7 @@ def registration_handlers(application: Application) -> None:
 
     application.add_handlers(
         [
+            conversation_instagram_check_handler,
             conversation_fetch_source_handler,
             conversation_phone_check_handler,
             conversation_link_check_handler,

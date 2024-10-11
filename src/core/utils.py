@@ -20,6 +20,7 @@ url_regex = (
     r"(\?[;&a-zA-Z0-9%_.,~+=-]*)?"
     r"(#[-a-zA-Z0-9_]*)?$"
 )
+username_regex = r"^@\S+"
 
 
 def unpack_args(args):

@@ -31,16 +31,22 @@ class ClaimDTO(BaseDTO):
         payload: Dict,
     ) -> Claim:
         _key_phone = "phone"
-        _strong_field: str = (
-            _key_phone if _key_phone in payload.keys() else "link"
+        keys = ["phone", "username", "link"]
+        strong_field = next(
+            (key for key in keys if key in payload), _key_phone
         )
-        if _strong_field != _key_phone:
-            payload[_key_phone] = None
-        else:
-            payload["link"] = None
+
+        # normalize fields of checking not nullable and case eq `strong_field`
+        payload["phone"] = (
+            payload["phone"] if strong_field == "phone" else None
+        )
+        payload["username"] = (
+            payload["username"] if strong_field == "username" else None
+        )
+        payload["link"] = payload["link"] if strong_field == "link" else None
 
         is_missed_fields, _missed_fields = await self.check_missed_payload(
-            required_fields=["type", _strong_field],
+            required_fields=["type", strong_field],
             payload=payload,
         )
         if is_missed_fields:
@@ -51,17 +57,17 @@ class ClaimDTO(BaseDTO):
         ).id
 
         # phone field normalization value
-        if (phone := payload.get(_key_phone)) and _strong_field == _key_phone:
+        if (phone := payload.get(_key_phone)) and strong_field == _key_phone:
             payload[_key_phone] = normalizer.normalize(phone=phone, as_db=True)
 
         return await self.db.execute_query(  # noqa
             """
             insert into claims (
-                type, author, decision, phone, link, status, platform
+                type, author, decision, phone, link, username, status, platform
             )
             values (
                 %(type)s::incidentenum, %(author)s, null, 
-                %(phone)s, %(link)s, 'accepted'::statusenum, null
+                %(phone)s, %(link)s, %(username)s, 'accepted'::statusenum, null
             ) returning *;
             """,
             params=payload,
@@ -161,58 +167,113 @@ class ClaimDTO(BaseDTO):
         )
         await self.set_status_claim(status=status)
 
-    async def check_existed_claim(self, phone: str):
-        return await self.db.execute_query(
-            """
-            with
-            unique_claim_fraud_cases as (
-                select EXISTS (
-                    select 1
-                    from claims
-                    where 
-                        phone = %(phone)s and 
-                        type = 'phone' and 
-                        status = 'resolved'::statusenum
-                ) AS exists
-            ),
-            latest_claim_date AS (
-                select MAX(created_at) AS created_at
-                from claims
-                where 
-                    phone = %(phone)s and 
-                    type = 'phone' and 
-                    status = 'resolved'::statusenum
-            ),
-            claim_platform AS (
-                select platform
-                from claims
-                where 
-                    phone = %(phone)s
-                    and type = 'phone'
-                    and status = 'resolved'::statusenum
-                group by platform
-                order by count(1) DESC
-                limit 1
-            ),
-            total_claims AS (
-                select count(1) AS total
-                from claims
-                where 
-                    phone = %(phone)s and 
-                    type = 'phone' and 
-                    status = 'resolved'::statusenum
+    async def check_existed_claim(
+        self,
+        link: str | None = None,
+        phone: str | None = None,
+        username: str | None = None,
+    ) -> Record:
+        """
+        Checks the existence of claims based on the provided phone number,
+         username, or link.
+
+        Depending on the passed parameters (`phone`, `username`, or `link`),
+         the function:
+          - Executes a query to the database to check for a claim with the
+          corresponding type (phone, username, or link).
+          - Returns data about the claim's existence, the date of the latest
+          claim, the platform, and the total number of claims.
+
+        Args:
+            phone (str, optional): The phone number to check for claims.
+            username (str, optional): The username to check for claims.
+            link (str, optional): The link to check for claims.
+
+        Returns:
+            Type: [Record] - Contains the following keys:
+                - `_existed_claim` (bool): Indicates whether a claim exists.
+                - `_last_claim` (datetime): The date of the last claim.
+                - `_platform_claim` (str): The platform with the highest number
+                of claims.
+                - `_total_claims` (int): The total number of claims.
+
+        Raises:
+            ValueError: If none of `phone`, `username`, or `link` is provided.
+        """
+        params = {}
+        conditions = []
+
+        if phone:
+            conditions.append("phone = %(phone)s")
+            params["phone"] = phone
+            claim_type = "phone"
+        elif username:
+            conditions.append("username = %(username)s")
+            params["username"] = username
+            claim_type = "username"
+        elif link:
+            conditions.append("link = %(link)s")
+            params["link"] = link
+            claim_type = "link"
+        else:
+            raise ValueError(
+                "At least one of 'phone', 'username', "
+                "or 'link' must be provided"
             )
-            select ucf.exists     AS _existed_claim,
-                   lid.created_at AS _last_claim,
-                   fp.platform    AS _platform_claim,
-                   tc.total       AS _total_claims
-            from unique_claim_fraud_cases ucf
-                     cross join latest_claim_date lid
-                     cross join claim_platform fp
-                     cross join total_claims tc;
-            """,
-            params={"phone": phone},
+
+        # Join conditions using AND
+        where_clause = " and ".join(conditions)
+
+        query = f"""
+        with
+        unique_claim_fraud_cases as (
+            select EXISTS (
+                select 1
+                from claims
+                where 
+                    {where_clause} and 
+                    type = '{claim_type}' and 
+                    status = 'resolved'::statusenum
+            ) AS exists
+        ),
+        latest_claim_date AS (
+            select MAX(created_at) AS created_at
+            from claims
+            where 
+                {where_clause} and 
+                type = '{claim_type}' and 
+                status = 'resolved'::statusenum
+        ),
+        claim_platform AS (
+            select platform
+            from claims
+            where 
+                {where_clause}
+                and type = '{claim_type}'
+                and status = 'resolved'::statusenum
+            group by platform
+            order by count(1) DESC
+            limit 1
+        ),
+        total_claims AS (
+            select count(1) AS total
+            from claims
+            where 
+                {where_clause} and 
+                type = '{claim_type}' and 
+                status = 'resolved'::statusenum
         )
+        select ucf.exists     AS _existed_claim,
+               lid.created_at AS _last_claim,
+               fp.platform    AS _platform_claim,
+               tc.total       AS _total_claims
+        from unique_claim_fraud_cases ucf
+                 cross join latest_claim_date lid
+                 cross join claim_platform fp
+                 cross join total_claims tc;
+        """
+
+        return await self.db.execute_query(query, params=params)  # noqa
 
     async def statistic_claims(self):
         result = {}
@@ -273,6 +334,18 @@ class ClaimDTO(BaseDTO):
             where cm.link = %(link)s and cm.status = 'resolved'::statusenum;
             """,
             params={"link": link},
+            record=Claim,
+        )
+
+    async def check_existed_username_claim(self, username: str):
+        return await self.db.execute_query(
+            """
+            select 
+                platform, username, type
+            from claims
+            where username = %(username)s and status = 'resolved'::statusenum;
+            """,
+            params={"username": username},
             record=Claim,
         )
 

@@ -1,2 +1,4 @@
 .venv
 bot.config.ini
+__pycache__
+.idea

@@ -1,5 +1,5 @@
 create extension if not exists pg_trgm;
-create type IncidentEnum as enum ('link', 'phone');
+create type IncidentEnum as enum ('link', 'phone', 'username');
 create type StatusEnum as enum ('accepted', 'pending', 'review', 'resolved', 'declined');
 
 create table if not exists author

@@ -32,21 +32,40 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     await log_event(
         logger, "Fetch source claim", payload={"msg": source_claim}
     )
+
     claim_obj = ClaimDTO(db=context.bot_data["database"])
 
     phone: str | None = normalizer.try_is_phone(phone=source_claim)
     if phone:
         payload["type"] = "phone"
         payload["phone"] = phone
+
+    elif source_claim.startswith("@"):
+        payload["type"] = "username"
+        payload["username"] = source_claim
     else:
         payload["type"] = "link"
         payload["link"] = get_link(url=source_claim)
 
-    if not payload.get("phone") and not payload.get("link"):
+    if (
+        not payload.get("phone")
+        and not payload.get("link")
+        and not payload.get("username")
+    ):
         await effective_message(
             update, message=R.string.incorrect_phone, is_reply=True
         )
         return HandlerStateEnum.AWAIT_PHONE_OR_LINK.value
+
+    if username := payload.get("username"):  # type str
+        claim: Claim = await claim_obj.check_existed_username_claim(username)
+        if claim:
+            await effective_message(
+                update,
+                message=R.string.user_confirmed_as_scammer.format(
+                    username=username
+                ),
+            )
 
     claim: Claim = await claim_obj.initiation_claim(
         author=update.effective_user,
@@ -54,6 +73,7 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     )
 
     context.user_data["claim"] = claim.id
+
     if url := payload.get("link"):  # type: str
         vt = VirusTotal()
         await create_bg_task(

@@ -7,6 +7,10 @@ from .check_link.klass import (
     StartCheckLinkHandler,
 )
 from .check_number.klass import CheckNumberHandler, ParseCheckPhoneHandler
+from .check_username.klass import (
+    CheckUsernameHandler,
+    ParseCheckUsernameHandler,
+)
 from .complain.klass import (
     ExitFallbackPhoneConvHandler,
     ParsePhoneOrLinkWithAskPlatformHandler,

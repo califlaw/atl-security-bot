@@ -1,0 +1,1 @@
+alter table claims add column if not exists username varchar(30);
