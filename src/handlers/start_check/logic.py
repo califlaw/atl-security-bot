@@ -34,6 +34,9 @@ async def start_manage_check_callback(
 
     context.user_data["claim"] = claim.id  # set context of `claim`
 
+    if not claim.link:
+        claim.link = ''  # allow empty line in template then None
+
     if claim.images:
         await update.effective_chat.send_media_group(claim.images)
     await effective_message(
