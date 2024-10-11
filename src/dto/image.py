@@ -57,10 +57,10 @@ class ImageDTO(BaseDTO):
             images = [images]  # strong case to list items
 
         for image in images:
-            if isinstance(
-                image, PhotoSize
-            ) and image.height <= settings.getint("DEFAULT", "minHeightImage"):
-                break
+            if hasattr(image, "height") and image.height <= settings.getint(
+                "DEFAULT", "minHeightImage"
+            ):
+                continue
 
             img_path = os.path.join(
                 img_claim_folder,
