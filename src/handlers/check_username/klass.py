@@ -4,6 +4,7 @@ from telegram import MessageEntity, Update
 from telegram.ext import ContextTypes, filters
 from telegram.ext.filters import MessageFilter
 
+from src.core.enums import CommandEnum
 from src.core.utils import username_regex
 from src.handlers.base import BaseHandlerKlass
 from src.handlers.check_username.enums import HandleCheckUsernameEnum
@@ -14,7 +15,7 @@ from src.handlers.check_username.logic import (
 
 
 class CheckUsernameHandler(BaseHandlerKlass):
-    command: str = "checkusername"
+    command: str = CommandEnum.CHECK_USERNAME.value
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
         Coroutine[Any, Any, int],

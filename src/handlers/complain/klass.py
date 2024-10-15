@@ -5,6 +5,7 @@ from telegram import MessageEntity, Update
 from telegram.ext import ContextTypes, filters
 from telegram.ext.filters import MessageFilter
 
+from src.core.enums import CommandEnum
 from src.core.filters import FlagPatternRegex
 from src.core.utils import simple_phone_regex, url_regex, username_regex
 from src.handlers.base import BaseHandlerKlass
@@ -19,7 +20,7 @@ from src.handlers.complain.logic import (
 
 
 class StartComplainHandler(BaseHandlerKlass):
-    command: str = "complain"
+    command: str = CommandEnum.COMPLAIN.value
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
         Coroutine[Any, Any, None],

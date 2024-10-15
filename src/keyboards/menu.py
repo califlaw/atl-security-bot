@@ -6,11 +6,11 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 def build_menu(
     buttons: List[InlineKeyboardButton],
     n_cols: int,
-    header_buttons: InlineKeyboardButton
-    | List[InlineKeyboardButton]
+    header_buttons: List[InlineKeyboardButton]
+    | InlineKeyboardButton
     | None = None,
-    footer_buttons: InlineKeyboardButton
-    | List[InlineKeyboardButton]
+    footer_buttons: List[InlineKeyboardButton]
+    | InlineKeyboardButton
     | None = None,
 ) -> List[List[InlineKeyboardButton]]:
     menu = [buttons[i : i + n_cols] for i in range(0, len(buttons), n_cols)]
@@ -33,11 +33,11 @@ def build_menu(
 def make_reply_markup(
     button_list: List[InlineKeyboardButton],
     colls: int = 1,
-    header_buttons: InlineKeyboardButton
-    | List[InlineKeyboardButton]
+    header_buttons: List[InlineKeyboardButton]
+    | InlineKeyboardButton
     | None = None,
-    footer_buttons: InlineKeyboardButton
-    | List[InlineKeyboardButton]
+    footer_buttons: List[InlineKeyboardButton]
+    | InlineKeyboardButton
     | None = None,
 ) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(

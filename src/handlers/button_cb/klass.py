@@ -7,7 +7,7 @@ from src.handlers import BaseHandlerKlass
 from src.handlers.button_cb.logic import button_callback
 
 
-class ButtonCallbacksHandler(BaseHandlerKlass):
+class GlobalButtonsCallbackHandler(BaseHandlerKlass):
     is_query: bool = True
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],

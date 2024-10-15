@@ -1,7 +1,7 @@
 from .base import BaseHandlerKlass
 
 # import impl klass commands
-from .button_cb.klass import ButtonCallbacksHandler
+from .button_cb.klass import GlobalButtonsCallbackHandler
 from .check_link.klass import (
     ParseLinkCheckProcessHandler,
     StartCheckLinkHandler,

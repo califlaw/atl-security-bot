@@ -134,7 +134,9 @@ def registration_handlers(application: Application) -> None:
     start_check_claim_handler = CommandHandler(
         StartCheckHandler.command, StartCheckHandler.logic
     )
-    buttons_cb_handler = CallbackQueryHandler(ButtonCallbacksHandler.logic)
+    global_buttons_cb_handler = CallbackQueryHandler(
+        GlobalButtonsCallbackHandler.logic
+    )
     stat_total_handler = CommandHandler(
         TotalHandler.command, TotalHandler.logic
     )
@@ -146,8 +148,8 @@ def registration_handlers(application: Application) -> None:
             conversation_phone_check_handler,
             conversation_link_check_handler,
             conversation_start_conv_handler,
+            global_buttons_cb_handler,
             start_check_claim_handler,
-            buttons_cb_handler,
             stat_total_handler,
             help_handler,
         ]

@@ -4,6 +4,7 @@ from telegram import MessageEntity, Update
 from telegram.ext import ContextTypes, filters
 from telegram.ext.filters import MessageFilter
 
+from src.core.enums import CommandEnum
 from src.core.utils import simple_phone_regex
 from src.handlers.base import BaseHandlerKlass
 from src.handlers.check_number.enums import HandleCheckPhoneEnum
@@ -14,7 +15,7 @@ from src.handlers.check_number.logic import (
 
 
 class CheckNumberHandler(BaseHandlerKlass):
-    command: str = "checknumber"
+    command: str = CommandEnum.CHECK_NUMBER.value
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
         Coroutine[Any, Any, int],

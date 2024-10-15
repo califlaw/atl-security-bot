@@ -17,3 +17,10 @@ class AuthorRankEnum(StrEnum):
     commander = "commander"
     defender = "defender"
     legend = "legend"
+
+class CommandEnum(StrEnum):
+    COMPLAIN = "complain"
+    CHECK_NUMBER = "checknumber"
+    CHECK_LINK = "checklink"
+    CHECK_USERNAME = "checkusername"
+    START = "start"

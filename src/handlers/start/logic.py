@@ -4,6 +4,7 @@ import structlog
 from telegram import InlineKeyboardButton, Update
 from telegram.ext import ContextTypes
 
+from src.core.enums import CommandEnum
 from src.core.settings import settings
 from src.core.templates import render_template
 from src.core.transliterate import R, effective_message
@@ -25,22 +26,41 @@ async def start_callback(
         InlineKeyboardButton(
             R.string.join_community,
             url=settings.get("bot", "communityGroupLink"),
+        )
+    ]
+    header_buttons = [
+        InlineKeyboardButton(
+            R.string.complain_command,
+            callback_data=CommandEnum.COMPLAIN.value,
+        ),
+        InlineKeyboardButton(
+            R.string.check_number_command,
+            callback_data=CommandEnum.CHECK_NUMBER.value,
+        ),
+        InlineKeyboardButton(
+            R.string.check_link_command,
+            callback_data=CommandEnum.CHECK_LINK.value,
+        ),
+        InlineKeyboardButton(
+            R.string.check_username_command,
+            callback_data=CommandEnum.CHECK_USERNAME.value,
         ),
     ]
-
     async with ChatActionContext(
         context.bot, chat_id=update.effective_chat.id
     ):
         await effective_message(
             update,
             message=render_template(TemplateFiles.start),
-            reply_markup=make_reply_markup(button_list=button_list),
+            reply_markup=make_reply_markup(
+                button_list=button_list, header_buttons=header_buttons
+            ),
         )
 
-    # remove on next release for continue flow of conversation user
     return HandlerStateEnum.STOP_CONVERSATION.value
 
 
+# remove on next release for continue flow of conversation user
 async def ask_user_phone_callback(update: Update, _) -> int:
     button_list = [
         InlineKeyboardButton(

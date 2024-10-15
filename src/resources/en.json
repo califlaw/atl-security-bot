@@ -43,5 +43,9 @@
   "analysing_malicious": "Analysis result: malicious",
   "analysing_suspicious": "Analysis result: suspicious",
   "analysing_timeout": "Analysis completed due to timeout",
-  "analysing_undetected": "Undetected"
+  "analysing_undetected": "Undetected",
+  "complain_command": "\uD83D\uDCA3 Report",
+  "check_number_command": "\uD83D\uDCF1 Check phone number",
+  "check_username_command": "\uD83C\uDF0D Check username",
+  "check_link_command": "\uD83D\uDD17 Check link"
 }

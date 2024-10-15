@@ -5,6 +5,7 @@ from telegram import MessageEntity, Update
 from telegram.ext import ContextTypes, filters
 from telegram.ext.filters import MessageFilter
 
+from src.core.enums import CommandEnum
 from src.core.filters import FlagPatternRegex
 from src.core.utils import url_regex
 from src.handlers.base import BaseHandlerKlass
@@ -16,7 +17,7 @@ from src.handlers.check_link.logic import (
 
 
 class StartCheckLinkHandler(BaseHandlerKlass):
-    command: str = "checklink"
+    command: str = CommandEnum.CHECK_LINK.value
     logic: Callable[
         [Update, ContextTypes.DEFAULT_TYPE],
         Coroutine[Any, Any, int],

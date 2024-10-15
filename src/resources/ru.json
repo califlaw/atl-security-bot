@@ -43,5 +43,9 @@
   "analysing_suspicious": "Анализ показал: подозрительно",
   "analysing_timeout": "Анализ завершён по таймауту",
   "analysing_undetected": "Не обнаружено",
-  "thx_security_kg_alga": "Спасибо за ваш вклад в безопасное кибер-пространство Кыргызстана! Алга!"
+  "thx_security_kg_alga": "Спасибо за ваш вклад в безопасное кибер-пространство Кыргызстана! Алга!",
+  "complain_command": "\uD83D\uDCA3 Пожаловаться",
+  "check_number_command": "\uD83D\uDCF1 Проверить номер телефона",
+  "check_username_command": "\uD83C\uDF0D Проверить имя пользователя",
+  "check_link_command": "\uD83D\uDD17 Проверить ссылку"
 }
