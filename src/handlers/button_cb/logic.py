@@ -1,8 +1,8 @@
 from telegram import Update
-from telegram.ext import ContextTypes
+from telegram.ext import CommandHandler, ContextTypes
 
-from src.core.enums import CommandEnum
 from src.core.transliterate import effective_message
+from src.core.wrap_handlers import WrapConversationHandler
 from src.handlers.button_cb.enums import CallbackStateEnum
 from src.handlers.button_cb.flows.claim import decision_claim
 
@@ -10,37 +10,30 @@ from src.handlers.button_cb.flows.claim import decision_claim
 async def button_callback(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    from src.handlers import (
-        CheckNumberHandler,
-        CheckUsernameHandler,
-        StartCheckLinkHandler,
-        StartComplainHandler,
-        StartHandler,
-    )
-
     query = update.callback_query
     await query.answer()
     callback_flow = query.data
 
-    if callback_flow in [
+    cb_states = [
         CallbackStateEnum.resolve.value,
         CallbackStateEnum.decline.value,
-    ]:
+    ]
+
+    # FIXME: @kdelinx
+    if callback_flow and callback_flow not in cb_states and False:
+        for handler in context.application.handlers.get(0, []):
+            # restrict call handlers
+            if f"conversation_{callback_flow}" != getattr(handler, "name", ""):
+                continue
+
+            if isinstance(handler, WrapConversationHandler):
+                await handler.trigger_immediately(update, context)
+            elif isinstance(handler, CommandHandler):
+                await handler.callback(update, context)
+
+        return None
+
+    if callback_flow in cb_states:
         message: str = await decision_claim(callback_flow, update, context)
         await effective_message(update, message=message)
         return None
-
-    match callback_flow:
-        case CommandEnum.START.value:
-            await StartHandler.logic(update, context)
-        case CommandEnum.COMPLAIN.value:
-            await StartComplainHandler.logic(update, context)
-        case CommandEnum.CHECK_LINK.value:
-            await StartCheckLinkHandler.logic(update, context)
-        case CommandEnum.CHECK_USERNAME.value:
-            await CheckUsernameHandler.logic(update, context)
-        case CommandEnum.CHECK_NUMBER.value:
-            await CheckNumberHandler.logic(update, context)
-
-        case _:
-            return None

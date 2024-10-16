@@ -48,7 +48,11 @@ class ImageDTO(BaseDTO):
 
     async def save_images(
         self, claim_id: int, images: Tuple[PhotoSize, ...] | Document
-    ):
+    ) -> None:
+        if not images:
+            # on case if empty sequence will on images, and skip create folders
+            return
+
         self._claim_id = claim_id
         img_claim_folder = self.get_attachment_path()
         os.makedirs(img_claim_folder, exist_ok=True)

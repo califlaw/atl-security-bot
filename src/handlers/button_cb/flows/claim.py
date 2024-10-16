@@ -1,4 +1,4 @@
-from telegram import Bot, Update, User
+from telegram import Update, User
 from telegram.ext import ContextTypes
 
 from src.core.transliterate import R
@@ -20,9 +20,8 @@ def _decision_msg(user: User) -> str:
 async def decision_claim(
     callback_flow: str, update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> str | None:
-    db = context.bot_data["database"]
     claim_id = extract_claim_id(context=context)
-    claim_obj = ClaimDTO(db=db)
+    claim_obj = ClaimDTO(db=context.bot_data["database"])
 
     if callback_flow == CallbackStateEnum.resolve.value:
         status = StatusEnum.resolved
@@ -31,15 +30,19 @@ async def decision_claim(
     else:
         return None
 
+    user: User = update.effective_user
     await claim_obj.resolve_claim(
         claim_id=claim_id,
-        decision=_decision_msg(update.effective_user),
+        decision=_decision_msg(user=user),
+        author_id=(await claim_obj.author.try_find_author(author=user)).id,
         status=status,
     )
+    await claim_obj.unlock_claim(claim_id=claim_id)
 
     if status == StatusEnum.resolved:
         claim: Claim = await claim_obj.get_detail_claim(status, claim_id)
-        async with notify_supergroup(claim=claim):  # type: Bot
+        async with notify_supergroup(claim=claim, is_general_group=True):
             await claim_obj.exp_resolved_claims(claim=claim)
+            return R.string.found_scammer
 
     return R.string.thx_decision_claim

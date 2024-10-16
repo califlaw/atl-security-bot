@@ -16,7 +16,7 @@ logger = structlog.stdlib.get_logger("notify.bot")
 
 @asynccontextmanager
 async def notify_supergroup(
-    claim: Claim | None = None,
+    claim: Claim | None = None, is_general_group: bool = False
 ) -> AsyncGenerator[Claim | None, Bot]:
     bot = Bot(token=settings.get("bot", "token"))
 
@@ -25,10 +25,10 @@ async def notify_supergroup(
             "bot", "notifyNewClaim", fallback=False
         ):
             params = {}
-            if topic_id := settings.getint(
-                "bot", "topicNotifyId", fallback=None
-            ):
-                params["message_thread_id"] = topic_id
+            if not is_general_group:
+                params["message_thread_id"] = settings.getint(
+                    "bot", "topicNotifyId"
+                )
 
             await bot.send_message(
                 chat_id=settings.get("bot", "superGroupId"),

@@ -3,6 +3,10 @@ from typing import List
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
+def _split_buttons(buttons, n_cols: int = 1) -> List:
+    return [buttons[i : i + n_cols] for i in range(0, len(buttons), n_cols)]
+
+
 def build_menu(
     buttons: List[InlineKeyboardButton],
     n_cols: int,
@@ -13,7 +17,7 @@ def build_menu(
     | InlineKeyboardButton
     | None = None,
 ) -> List[List[InlineKeyboardButton]]:
-    menu = [buttons[i : i + n_cols] for i in range(0, len(buttons), n_cols)]
+    menu = _split_buttons(buttons, n_cols)
     if header_buttons:
         menu.insert(
             0,

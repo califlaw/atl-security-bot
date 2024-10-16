@@ -18,6 +18,7 @@ class AuthorRankEnum(StrEnum):
     defender = "defender"
     legend = "legend"
 
+
 class CommandEnum(StrEnum):
     COMPLAIN = "complain"
     CHECK_NUMBER = "checknumber"

@@ -26,13 +26,13 @@ async def start_manage_check_callback(
 
     claim: Claim | None = await ClaimDTO(
         db=context.bot_data["database"]
-    ).get_accepted_claim()
+    ).get_accepted_claim(tg_user_id=update.effective_user.id)
 
     if not claim:
         await effective_message(update, message=R.string.claim_not_found)
         return
 
-    context.user_data["claim"] = claim.id  # set context of `claim`
+    context.user_data["claim"] = claim.id  # set context of `claim` type: int
 
     if not claim.link:
         claim.link = ""  # allow empty line in template then None

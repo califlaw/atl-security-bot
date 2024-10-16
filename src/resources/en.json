@@ -1,6 +1,6 @@
 {
-  "no": "\u274C (no)",
-  "yes": "\u2705 (yes)",
+  "warning": "\u2757 Warning",
+  "clear": "\u2705 Clear",
   "link": "Link",
   "phone": "Phone number",
   "ask_help": "\uD83C\uDD98 Ask a help",
@@ -28,6 +28,7 @@
   "incorrect_phone": "Incorrect wrote phone number, repeat again",
   "ask_claim_platform": "What is platform? (lalafo.kg, instagram, etc...)",
   "attach_images": "Pls, attach images",
+  "found_scammer": "Attention! Found new scammer",
   "claim_not_found": "Claim not found in database",
   "phone_not_found": "Phone number not found in base of claims",
   "username_not_found": "Username not found in base of claims",

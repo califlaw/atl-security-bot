@@ -34,12 +34,12 @@ async def start_callback(
             callback_data=CommandEnum.COMPLAIN.value,
         ),
         InlineKeyboardButton(
-            R.string.check_number_command,
-            callback_data=CommandEnum.CHECK_NUMBER.value,
-        ),
-        InlineKeyboardButton(
             R.string.check_link_command,
             callback_data=CommandEnum.CHECK_LINK.value,
+        ),
+        InlineKeyboardButton(
+            R.string.check_number_command,
+            callback_data=CommandEnum.CHECK_NUMBER.value,
         ),
         InlineKeyboardButton(
             R.string.check_username_command,
@@ -53,7 +53,8 @@ async def start_callback(
             update,
             message=render_template(TemplateFiles.start),
             reply_markup=make_reply_markup(
-                button_list=button_list, header_buttons=header_buttons
+                button_list=header_buttons + button_list,
+                colls=1,
             ),
         )
 

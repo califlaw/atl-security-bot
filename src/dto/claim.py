@@ -100,17 +100,32 @@ class ClaimDTO(BaseDTO):
         self,
         status: StatusEnum = StatusEnum.accepted,
         claim_id: int | None = None,
+        tg_user_id: int | None = None,
     ) -> Claim:
         params: Dict = {"status": status.value}
         if claim_id:
             sql: LiteralString = """
-                select * from claims where status = %(status)s and id = %(id)s
+                select * from claims 
+                where status = %(status)s and id = %(id)s and is_locked = false
                 order by created_at limit 1;
             """
             params["id"] = claim_id
+        elif tg_user_id:
+            sql: LiteralString = """
+                select cl.* from claims cl
+                join author au on au.id = cl.author
+                where (
+                    is_locked = true and
+                    cl.status = %(status)s and 
+                    au.tg_user_id = %(tg_user_id)s 
+                )
+                order by cl.created_at limit 1;
+            """
+            params["tg_user_id"] = tg_user_id
         else:
             sql: LiteralString = """
-                select * from claims where status = %(status)s
+                select * from claims 
+                where status = %(status)s and is_locked = false
                 order by created_at limit 1;
             """
 
@@ -145,25 +160,42 @@ class ClaimDTO(BaseDTO):
             params={"id": self._id, "platform": platform},
         )
 
-    async def get_accepted_claim(self) -> Claim | None:
+    async def get_accepted_claim(self, tg_user_id: int) -> Claim | None:
+        claim: Claim | None = None
+
         try:
-            claim: Claim = await self.get_detail_claim()
-            claim.images = await self.image.attach_images(claim_id=claim.id)
-            return claim
+            claim: Claim = await self.get_detail_claim(
+                status=StatusEnum.accepted, tg_user_id=tg_user_id
+            )
         except NotFoundEntity:
-            return None
+            # try find new accepted claim, if not found locked by user
+            claim: Claim = await self.get_detail_claim(
+                status=StatusEnum.accepted
+            )
+        finally:
+            if claim:
+                claim.images = await self.image.attach_images(
+                    claim_id=claim.id
+                )
+                await self.lock_claim(claim_id=claim.id, tg_user_id=tg_user_id)
+
+        return claim
 
     async def resolve_claim(
-        self, claim_id: int, decision: str, status: StatusEnum
+        self, claim_id: int, decision: str, author_id: UUID, status: StatusEnum
     ):
         self._id = claim_id
         await self.db.execute_query(
             """
             update claims set 
-                decision = %(decision)s 
+                decision = %(decision)s, processed_by = %(processed_by)s
             where id = %(id)s;
             """,
-            params={"id": claim_id, "decision": decision},
+            params={
+                "id": claim_id,
+                "decision": decision,
+                "processed_by": author_id,
+            },
         )
         await self.set_status_claim(status=status)
 
@@ -355,4 +387,30 @@ class ClaimDTO(BaseDTO):
             insert into malware (type, claim_id) values (%(type)s, %(claim_id)s)
             """,
             params={"claim_id": claim_id, "type": task_result},
+        )
+
+    async def lock_claim(self, claim_id: int, tg_user_id: int) -> None:
+        await self.db.execute_query(
+            """
+            update claims 
+            set 
+                is_locked = true, lock_id = %(tg_user_id)s 
+            where id = %(id)s and status = 'accepted'::statusenum;
+            """,
+            params={"id": claim_id, "tg_user_id": tg_user_id},
+        )
+
+    async def unlock_claim(self, claim_id: int) -> None:
+        await self.db.execute_query(
+            """
+            update claims 
+            set 
+                is_locked = false, lock_id = null 
+            where (
+                id = %(id)s and 
+                is_locked = true and 
+                status in ('resolved', 'declined')
+            );
+            """,
+            params={"id": claim_id},
         )

@@ -6,7 +6,6 @@ from telegram.ext import (
     Application,
     CallbackQueryHandler,
     CommandHandler,
-    ConversationHandler,
     MessageHandler,
 )
 
@@ -59,18 +58,18 @@ def _prepare_states(
 
 
 def registration_handlers(application: Application) -> None:
-    conversation_start_conv_handler = ConversationHandler(
+    conversation_start_conv_handler = WrapConversationHandler(
         entry_points=[
             CommandHandler(StartHandler.command, StartHandler.logic)
         ],
         states=_prepare_states(store=_start_conv_handlers),
         fallbacks=[],
-        name="conversation_start_main",
+        name=f"conversation_{CommandEnum.START.value}",
         allow_reentry=False,
         persistent=False,
     )
 
-    conversation_fetch_source_handler = ConversationHandler(
+    conversation_fetch_source_handler = WrapConversationHandler(
         entry_points=[
             CommandHandler(
                 StartComplainHandler.command, StartComplainHandler.logic
@@ -80,12 +79,12 @@ def registration_handlers(application: Application) -> None:
         fallbacks=[
             CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
-        name="conversation_fetch_source",
+        name=f"conversation_{CommandEnum.COMPLAIN.value}",
         allow_reentry=True,
         persistent=False,
     )
 
-    conversation_phone_check_handler = ConversationHandler(
+    conversation_phone_check_handler = WrapConversationHandler(
         entry_points=[
             CommandHandler(
                 CheckNumberHandler.command, CheckNumberHandler.logic
@@ -95,12 +94,12 @@ def registration_handlers(application: Application) -> None:
         fallbacks=[
             CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
-        name="conversation_check_phone",
+        name=f"conversation_{CommandEnum.CHECK_NUMBER.value}",
         allow_reentry=True,
         persistent=False,
     )
 
-    conversation_instagram_check_handler = ConversationHandler(
+    conversation_instagram_check_handler = WrapConversationHandler(
         entry_points=[
             CommandHandler(
                 CheckUsernameHandler.command, CheckUsernameHandler.logic
@@ -110,12 +109,12 @@ def registration_handlers(application: Application) -> None:
         fallbacks=[
             CallbackQueryHandler(callback=ExitFallbackPhoneConvHandler.logic)
         ],
-        name="conversation_check_username",
+        name=f"conversation_{CommandEnum.CHECK_USERNAME.value}",
         allow_reentry=True,
         persistent=False,
     )
 
-    conversation_link_check_handler = ConversationHandler(
+    conversation_link_check_handler = WrapConversationHandler(
         entry_points=[
             CommandHandler(
                 StartCheckLinkHandler.command, StartCheckLinkHandler.logic
@@ -123,7 +122,7 @@ def registration_handlers(application: Application) -> None:
         ],
         states=_prepare_states(store=_check_link_handlers),
         fallbacks=[],
-        name="conversation_check_link",
+        name=f"conversation_{CommandEnum.CHECK_LINK.value}",
         allow_reentry=True,
         persistent=False,
     )

@@ -81,7 +81,7 @@ def type_normalizer(payload: Dict | Type[BaseRecord]) -> Dict:
                 )
 
             case bool():
-                result[key] = R.string.yes if value else R.string.no
+                result[key] = R.string.clear if not value else R.string.warning
 
             case _ if key == "type" and value in {"link", "phone"}:
                 result["type"] = value

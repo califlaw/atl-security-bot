@@ -23,7 +23,7 @@ async def check_number_callback(
         existed_claim = await ClaimDTO(
             db=context.bot_data["database"]
         ).check_existed_claim(
-            normalizer.normalize(phone=update.message.text, as_db=True)
+            phone=normalizer.normalize(phone=update.message.text, as_db=True)
         )
 
     if not existed_claim:

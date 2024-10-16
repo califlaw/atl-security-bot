@@ -4,6 +4,7 @@ loggingLevel = INFO
 sentryDsn =
 environment = dev
 timezone = Asia/Bishkek
+awaitPerPhotoUploadSec = 5.0
 dateFormat = %%d-%%m-%%Y
 dateTimeFormat = %%d-%%m-%%Y %%H:%%M
 

@@ -1,11 +1,13 @@
-from typing import List, Tuple
+import asyncio
+from typing import Dict, List, Tuple
 
 import structlog
-from telegram import Document, PhotoSize, Update
+from telegram import Bot, Document, PhotoSize, Update
 from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
+from src.core.settings import settings
 from src.core.transliterate import R, effective_message
 from src.core.utils import create_bg_task, get_link, get_safe_last_element
 from src.core.virustotal import VirusTotal
@@ -15,6 +17,7 @@ from src.dto.models import Claim
 from src.handlers.complain.enums import HandlerStateEnum
 from src.handlers.exceptions import ExtractClaimIDError
 from src.handlers.helpers import extract_claim_id
+from src.helpers.notify_bot import notify_supergroup
 
 logger = structlog.stdlib.get_logger("handlers.complain")
 
@@ -39,7 +42,6 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     if phone:
         payload["type"] = "phone"
         payload["phone"] = phone
-
     elif source_claim.startswith("@"):
         payload["type"] = "username"
         payload["username"] = source_claim
@@ -47,11 +49,7 @@ async def complain_parse_phone_or_link_ask_platform_callback(
         payload["type"] = "link"
         payload["link"] = get_link(url=source_claim)
 
-    if (
-        not payload.get("phone")
-        and not payload.get("link")
-        and not payload.get("username")
-    ):
+    if not any(payload.get(key) for key in ("phone", "link", "username")):
         await effective_message(
             update, message=R.string.incorrect_phone, is_reply=True
         )
@@ -72,7 +70,7 @@ async def complain_parse_phone_or_link_ask_platform_callback(
         payload=payload,
     )
 
-    context.user_data["claim"] = claim.id
+    context.user_data["claim"] = claim.id  # type: int
 
     if url := payload.get("link"):  # type: str
         vt = VirusTotal()
@@ -85,6 +83,9 @@ async def complain_parse_phone_or_link_ask_platform_callback(
     await effective_message(
         update, message=R.string.ask_claim_platform, is_reply=True
     )
+
+    async with notify_supergroup(claim=claim):  # type: Bot
+        pass
 
     return HandlerStateEnum.AWAIT_PLATFORM.value
 
@@ -118,6 +119,23 @@ async def complain_parse_platform_ask_photos_callback(
     return HandlerStateEnum.AWAIT_PHOTOS.value
 
 
+async def complete_upload_photos_callback(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
+    await asyncio.sleep(settings.getfloat("DEFAULT", "awaitPerPhotoUploadSec"))
+
+    user_data: Dict = context.user_data
+    num_photos: int = len(user_data.get("photos", []))  # FIXME: @kdelinx
+
+    if num_photos > 0:
+        await effective_message(
+            update, message=R.string.thx_finish_claim, is_reply=True
+        )
+        user_data.clear()
+
+    return HandlerStateEnum.STOP_CONVERSATION.value
+
+
 async def complain_parse_photos_or_stop_callback(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -137,10 +155,14 @@ async def complain_parse_photos_or_stop_callback(
     image_obj = ImageDTO(db=context.bot_data["database"])
     await image_obj.save_images(claim_id=claim_id, images=images)
 
-    await effective_message(
-        update, message=R.string.thx_finish_claim, is_reply=True
+    if photo_task_cb := context.user_data.get("photo_task_cb"):
+        # type: photo_task_cb is asyncio.Task
+        photo_task_cb.cancel(msg="Interrupt upload photo task")
+
+    context.user_data["photo_task_cb"] = context.application.create_task(
+        complete_upload_photos_callback(update, context),
+        name="complete_upload_photos",
     )
-    return HandlerStateEnum.STOP_CONVERSATION.value
 
 
 async def fallback_exit_conv_callback(update: Update, _) -> int:
