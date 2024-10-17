@@ -56,6 +56,10 @@ def random_string(length: int) -> str:
     )
 
 
+def make_referral_link(referral_code: str, bot_username: str) -> str:
+    return f"https://t.me/{bot_username}?start={referral_code}"
+
+
 def decode_url_b64(link: str) -> str:
     return base64.urlsafe_b64encode(link.encode()).decode().strip("=")
 

@@ -48,5 +48,11 @@
   "complain_command": "\uD83D\uDCA3 Пожаловаться",
   "check_number_command": "\uD83D\uDCF1 Проверить номер телефона",
   "check_username_command": "\uD83C\uDF0D Проверить имя пользователя",
-  "check_link_command": "\uD83D\uDD17 Проверить ссылку"
+  "check_link_command": "\uD83D\uDD17 Проверить ссылку",
+  "referral_link": "Ваша реферальная ссылка: {}",
+  "referral_positions": "Количество приглашенных: {}",
+  "select_option": "Выберите действие ниже:",
+  "referral_link_option": "Получить реферальную ссылку",
+  "referral_position_option": "Посмотреть статистику приглашений",
+  "referral_query": "\ud83d\udd0e информация о рефералах"
 }

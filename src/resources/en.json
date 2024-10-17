@@ -48,5 +48,11 @@
   "complain_command": "\uD83D\uDCA3 Report",
   "check_number_command": "\uD83D\uDCF1 Check phone number",
   "check_username_command": "\uD83C\uDF0D Check username",
-  "check_link_command": "\uD83D\uDD17 Check link"
+  "check_link_command": "\uD83D\uDD17 Check link",
+  "referral_link": "Here is your referral link: {}",
+  "referral_positions": "You have referred {} people so far.",
+  "select_option": "Please choose an option below:",
+  "referral_link_option": "Get my referral link",
+  "referral_position_option": "Check my referral stats",
+  "referral_query": "\ud83d\udd0e referral information"
 }

@@ -25,3 +25,4 @@ class CommandEnum(StrEnum):
     CHECK_LINK = "checklink"
     CHECK_USERNAME = "checkusername"
     START = "start"
+    REFERRAL = "referral"

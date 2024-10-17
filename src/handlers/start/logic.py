@@ -10,6 +10,7 @@ from src.core.templates import render_template
 from src.core.transliterate import R, effective_message
 from src.core.utils import ChatActionContext
 from src.dto.author import AuthorDTO
+from src.dto.referral import ReferralDTO
 from src.handlers.enums import TemplateFiles
 from src.handlers.start.enums import HandlerStateEnum
 from src.keyboards.menu import make_reply_markup
@@ -22,6 +23,17 @@ SKIP_REGISTER_USER: Final[str] = "skip_register_user"
 async def start_callback(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    ref_id = (
+        update.message.text.split()[1]
+        if len(update.message.text.split()) > 1
+        else None
+    )
+    if ref_id:
+        referral_obj = ReferralDTO(db=context.bot_data["database"])
+        await referral_obj.add_referral(
+            update.effective_user, referral_code=ref_id
+        )
+
     button_list = [
         InlineKeyboardButton(
             R.string.join_community,

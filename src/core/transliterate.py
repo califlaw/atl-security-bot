@@ -3,7 +3,7 @@ import os
 
 import aiofiles
 import structlog
-from telegram import InlineKeyboardMarkup, Update
+from telegram import CallbackQuery, InlineKeyboardMarkup, Update
 from telegram.helpers import escape_markdown
 
 from src.core.logger import log_event
@@ -70,12 +70,17 @@ async def effective_message(
     message: str,
     is_reply: bool = False,
     reply_markup: InlineKeyboardMarkup | None = None,
+    query: CallbackQuery | None = None,
     **kwargs,
 ) -> None:
     text = escape_markdown(message, version=2, entity_type=None)
 
     if reply_markup:
         kwargs["reply_markup"] = reply_markup
+
+    if query:
+        await query.edit_message_text(text, **kwargs)
+        return
 
     if is_reply:
         await update.message.reply_text(text=text, **kwargs)

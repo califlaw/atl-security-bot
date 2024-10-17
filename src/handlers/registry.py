@@ -13,6 +13,7 @@ from . import *
 
 _start_conv_handlers = defaultdict()
 _store_claim_handlers = defaultdict()
+_store_referral_handlers = defaultdict()
 
 _check_link_handlers = defaultdict()
 _check_phone_handlers = defaultdict()
@@ -25,6 +26,9 @@ for _start_hdl in [
     AskStartUserPhoneOrSkipHandler,
 ]:
     _start_conv_handlers[_start_hdl.state] = _start_hdl
+
+for _referral_hdl in [CallbackReferralConvHandler]:
+    _store_referral_handlers[_referral_hdl.state] = _referral_hdl
 
 for _phone_hdl in [
     ParsePhoneOrLinkWithAskPlatformHandler,
@@ -99,7 +103,20 @@ def registration_handlers(application: Application) -> None:
         persistent=False,
     )
 
-    conversation_instagram_check_handler = WrapConversationHandler(
+    conversation_referral_handler = WrapConversationHandler(
+        entry_points=[
+            CommandHandler(
+                StartReferralHandler.command, StartReferralHandler.logic
+            )
+        ],
+        states=_prepare_states(store=_store_referral_handlers),
+        fallbacks=[],
+        name=f"conversation_{CommandEnum.REFERRAL.value}",
+        allow_reentry=True,
+        persistent=False,
+    )
+
+    conversation_username_check_handler = WrapConversationHandler(
         entry_points=[
             CommandHandler(
                 CheckUsernameHandler.command, CheckUsernameHandler.logic
@@ -128,13 +145,13 @@ def registration_handlers(application: Application) -> None:
     )
 
     help_handler = CommandHandler(HelpHandler.command, HelpHandler.logic)
+    global_buttons_cb_handler = CallbackQueryHandler(
+        GlobalButtonsCallbackHandler.logic
+    )
 
     # manager commands
     start_check_claim_handler = CommandHandler(
         StartCheckHandler.command, StartCheckHandler.logic
-    )
-    global_buttons_cb_handler = CallbackQueryHandler(
-        GlobalButtonsCallbackHandler.logic
     )
     stat_total_handler = CommandHandler(
         TotalHandler.command, TotalHandler.logic
@@ -142,11 +159,12 @@ def registration_handlers(application: Application) -> None:
 
     application.add_handlers(
         [
-            conversation_instagram_check_handler,
+            conversation_username_check_handler,
             conversation_fetch_source_handler,
             conversation_phone_check_handler,
             conversation_link_check_handler,
             conversation_start_conv_handler,
+            conversation_referral_handler,
             global_buttons_cb_handler,
             start_check_claim_handler,
             stat_total_handler,

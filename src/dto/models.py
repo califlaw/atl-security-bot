@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Literal, Sequence
+from typing import List, Literal, Sequence
 from uuid import UUID
 
 from asyncpg import Record
@@ -54,6 +54,14 @@ class Claim(BaseRecord):
     phone: str | None = None
     username: str | None = None
     images: Sequence[Image] = []
+
+
+class Referrer(BaseRecord):
+    id: int
+    created_at: datetime
+    author: UUID
+    referrer_code: str
+    referrers: List[int]
 
 
 class Author(BaseRecord):

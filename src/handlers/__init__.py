@@ -22,6 +22,7 @@ from .complain.klass import (
     StartComplainHandler,
 )
 from .help.klass import HelpHandler
+from .referral.klass import CallbackReferralConvHandler, StartReferralHandler
 from .start.klass import (
     AskStartUserPhoneOrSkipHandler,
     ButtonStartCallbacksHandler,

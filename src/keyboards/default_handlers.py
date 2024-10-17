@@ -30,6 +30,7 @@ class LanguageCommands:
             result[_lang].update(
                 {
                     "help": R.string.ask_help,
+                    "referral": R.string.referral_query,
                     "start": R.string.start_claim_process,
                     "checknumber": R.string.checknumber_query,
                     "checkusername": R.string.checkusername_query,
