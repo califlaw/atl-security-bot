@@ -1,11 +1,25 @@
-# ATLCyberBot
+# ATLANTS SECURITY BOT
 
 
 ## Getting started
-ATL Cyber Bot - application to detect claims on Kyrgyzstan world wide network. 
-The most negative persons, who make citizens on low facture mind.
+ATLANTS SECURITY Bot is an open-source application designed to combat cyber fraud in Kyrgyzstan. Our mission is to protect citizens from the increasing threats posed by cybercriminals and to promote online safety.
+Features
 
-Everybody could find malefactor and reacted as you need.
+    Report Cyber Fraud: Users can submit complaints about potential instances of cyber fraud, contributing to a collective effort to identify and combat malicious activities online.
+
+    Fraud Detection: Check if specific web resources, such as nicknames, credit card numbers, financial applications, and phone numbers, have been flagged in connection with cyber fraud.
+
+    Community-Driven: The bot empowers users to take an active role in the fight against cybercrime by allowing them to report suspicious activities and share their experiences.
+
+    User-Friendly Interface: The application is designed with user experience in mind, making it easy for anyone to navigate and report issues.
+
+Join Us in the Fight Against Cybercrime!
+
+As a community, we can make a difference in safeguarding our online environment. By using ATL SEC Bot, you contribute to a larger movement aimed at protecting fellow citizens from cyber threats.
+
+For more information, join our telegram community-group, and also feel free to contribute to the project!
+
+Together, let's stand up against cyber fraud!
 
 ***
 
