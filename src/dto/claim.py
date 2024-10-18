@@ -94,6 +94,7 @@ class ClaimDTO(BaseDTO):
         status: StatusEnum = StatusEnum.accepted,
         claim_id: int | None = None,
         tg_user_id: int | None = None,
+        skip_raise_error: bool = False,
     ) -> Claim:
         params: Dict = {"status": status.value}
         if claim_id:
@@ -127,7 +128,7 @@ class ClaimDTO(BaseDTO):
             params=params,
             record=Claim,
         )
-        if not claim:
+        if not claim and skip_raise_error is False:
             raise NotFoundEntity
 
         return claim
@@ -163,7 +164,7 @@ class ClaimDTO(BaseDTO):
         except NotFoundEntity:
             # try find new accepted claim, if not found locked by user
             claim: Claim = await self.get_detail_claim(
-                status=StatusEnum.accepted
+                status=StatusEnum.accepted, skip_raise_error=True
             )
         finally:
             if claim:
