@@ -6,6 +6,7 @@ from telegram.ext import (
     Application,
     CallbackQueryHandler,
     CommandHandler,
+    ConversationHandler,
     MessageHandler,
 )
 
@@ -62,7 +63,7 @@ def _prepare_states(
 
 
 def registration_handlers(application: Application) -> None:
-    conversation_start_conv_handler = WrapConversationHandler(
+    conversation_start_conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler(StartHandler.command, StartHandler.logic)
         ],
@@ -73,11 +74,15 @@ def registration_handlers(application: Application) -> None:
         persistent=False,
     )
 
-    conversation_fetch_source_handler = WrapConversationHandler(
+    conversation_fetch_source_handler = ConversationHandler(
         entry_points=[
             CommandHandler(
                 StartComplainHandler.command, StartComplainHandler.logic
-            )
+            ),
+            CallbackQueryHandler(
+                StartComplainHandler.logic,
+                pattern=f"conversation_{CommandEnum.COMPLAIN.value}",
+            ),
         ],
         states=_prepare_states(store=_store_claim_handlers),
         fallbacks=[
@@ -88,11 +93,15 @@ def registration_handlers(application: Application) -> None:
         persistent=False,
     )
 
-    conversation_phone_check_handler = WrapConversationHandler(
+    conversation_phone_check_handler = ConversationHandler(
         entry_points=[
             CommandHandler(
                 CheckNumberHandler.command, CheckNumberHandler.logic
-            )
+            ),
+            CallbackQueryHandler(
+                CheckNumberHandler.logic,
+                pattern=f"conversation_{CommandEnum.CHECK_NUMBER.value}",
+            ),
         ],
         states=_prepare_states(store=_check_phone_handlers),
         fallbacks=[
@@ -103,11 +112,15 @@ def registration_handlers(application: Application) -> None:
         persistent=False,
     )
 
-    conversation_referral_handler = WrapConversationHandler(
+    conversation_referral_handler = ConversationHandler(
         entry_points=[
             CommandHandler(
                 StartReferralHandler.command, StartReferralHandler.logic
-            )
+            ),
+            CallbackQueryHandler(
+                StartReferralHandler.logic,
+                pattern=f"conversation_{CommandEnum.REFERRAL.value}",
+            ),
         ],
         states=_prepare_states(store=_store_referral_handlers),
         fallbacks=[],
@@ -116,11 +129,15 @@ def registration_handlers(application: Application) -> None:
         persistent=False,
     )
 
-    conversation_username_check_handler = WrapConversationHandler(
+    conversation_username_check_handler = ConversationHandler(
         entry_points=[
             CommandHandler(
                 CheckUsernameHandler.command, CheckUsernameHandler.logic
-            )
+            ),
+            CallbackQueryHandler(
+                CheckUsernameHandler.logic,
+                pattern=f"conversation_{CommandEnum.CHECK_USERNAME.value}",
+            ),
         ],
         states=_prepare_states(store=_check_username_handlers),
         fallbacks=[
@@ -131,11 +148,15 @@ def registration_handlers(application: Application) -> None:
         persistent=False,
     )
 
-    conversation_link_check_handler = WrapConversationHandler(
+    conversation_link_check_handler = ConversationHandler(
         entry_points=[
             CommandHandler(
                 StartCheckLinkHandler.command, StartCheckLinkHandler.logic
-            )
+            ),
+            CallbackQueryHandler(
+                StartCheckLinkHandler.logic,
+                pattern=f"conversation_{CommandEnum.CHECK_LINK.value}",
+            ),
         ],
         states=_prepare_states(store=_check_link_handlers),
         fallbacks=[],

@@ -2,12 +2,10 @@ from enum import Enum, StrEnum
 
 
 class ExperienceEnum(Enum):
-    newbie = 200
-    advanced = 500
-    expert = 1_000
-    master = 2_000
-    guru = 5_000
-    legend = 10_000
+    invite_people = 50
+    processing_claim = 50
+    publish_story = 100
+    email = 100
 
 
 class AuthorRankEnum(StrEnum):
@@ -25,4 +23,4 @@ class CommandEnum(StrEnum):
     CHECK_LINK = "checklink"
     CHECK_USERNAME = "checkusername"
     START = "start"
-    REFERRAL = "referral"
+    REFERRAL = "invitation"

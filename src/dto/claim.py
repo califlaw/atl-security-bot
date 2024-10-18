@@ -4,6 +4,7 @@ from uuid import UUID
 from asyncpg import Record
 from telegram import User
 
+from src.core.enums import ExperienceEnum
 from src.core.normalizer import NormalizePhoneNumber
 from src.dto.author import AuthorDTO
 from src.dto.base import BaseDTO
@@ -81,17 +82,9 @@ class ClaimDTO(BaseDTO):
                     status=StatusEnum.resolved, claim_id=claim
                 )
 
-            result_claims: Record = await self.db.execute_query(
-                """
-                select count(1) as _count 
-                from claims cl
-                where cl.author = %(author_id)s and status = 'resolved';
-                """,
-                params={"author_id": claim.author},
-            )
             await self.author.inc_exp(
                 author_id=claim.author,
-                claims_cnt=result_claims.get("_count", 0),
+                exp=ExperienceEnum.processing_claim,
             )
         except NotFoundEntity:
             return

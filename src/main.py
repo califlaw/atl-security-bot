@@ -3,6 +3,7 @@ import sentry_sdk
 from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
 from sentry_sdk.integrations.httpx import HttpxIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 from telegram.constants import ParseMode
 from telegram.ext import Application, Defaults
 
@@ -13,6 +14,7 @@ from src.core.transliterate import load_strings
 from src.core.updater import ALL_ALLOWED_TYPES, UpdProcessorMiddleware
 from src.handlers.registry import registration_handlers
 from src.keyboards.default_handlers import set_default_commands
+from src.scheduler_jobs.registry import registration_queue
 
 
 async def post_init(_application: Application) -> None:
@@ -29,6 +31,7 @@ async def post_init(_application: Application) -> None:
             profiles_sample_rate=1.0,
             integrations=[
                 HttpxIntegration(),
+                RedisIntegration(),
                 AsyncPGIntegration(),
                 AsyncioIntegration(),
             ],
@@ -65,13 +68,25 @@ def main():
         .post_init(post_init)
         .post_shutdown(post_shutdown)
         .concurrent_updates(upd_processor)
+        .read_timeout(settings.getfloat("DEFAULT", "readTimeout"))
+        .get_updates_read_timeout(
+            settings.getfloat("DEFAULT", "updReadTimeout")
+        )
+        .get_updates_connect_timeout(
+            settings.getfloat("DEFAULT", "updConnectionTimeout")
+        )
         .token(settings.get("bot", "token"))
         .build()
     )
+
+    # configure storage jobs
     local_app.app = application
 
     # registration logic commands
     registration_handlers(application=application)
+
+    # registration queue jobs
+    registration_queue(application=application)
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=ALL_ALLOWED_TYPES)

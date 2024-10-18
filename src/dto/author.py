@@ -61,18 +61,8 @@ class AuthorDTO(BaseDTO):
     async def set_phone(self, phone: str) -> bool:
         pass
 
-    async def inc_exp(self, author_id: UUID, claims_cnt: int = 0):
+    async def inc_exp(self, author_id: UUID, exp: ExperienceEnum):
         author: Author = await self.get_by_id(_id=author_id)
-
-        match claims_cnt:
-            case cnt if 0 < cnt <= 5:
-                exp = ExperienceEnum.newbie
-            case cnt if 5 < cnt <= 10:
-                exp = ExperienceEnum.advanced
-            case cnt if 10 < cnt <= 50:
-                exp = ExperienceEnum.expert
-            case _:
-                exp = ExperienceEnum.newbie
 
         await self.db.execute_query(
             """

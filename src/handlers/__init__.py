@@ -1,5 +1,4 @@
 from src.core.enums import CommandEnum  # noqa
-from src.core.wrap_handlers import WrapConversationHandler  # noqa
 
 from .base import BaseHandlerKlass
 

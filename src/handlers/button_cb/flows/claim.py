@@ -1,6 +1,7 @@
 from telegram import Update, User
 from telegram.ext import ContextTypes
 
+from src.core.enums import ExperienceEnum
 from src.core.transliterate import R
 from src.dto.claim import ClaimDTO
 from src.dto.models import Claim

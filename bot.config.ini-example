@@ -7,6 +7,9 @@ timezone = Asia/Bishkek
 awaitPerPhotoUploadSec = 5.0
 dateFormat = %%d-%%m-%%Y
 dateTimeFormat = %%d-%%m-%%Y %%H:%%M
+readTimeout = 10.0
+updReadTimeout = 10.0
+updConnectionTimeout = 10.0
 
 [bot]
 botName = Альтрон
@@ -22,6 +25,7 @@ communityGroupLink =
 maxConcurrent = 256
 
 [database]
+redisDsn = redis://localhost:6379/3
 dsn = postgresql://user:password@localhost:5432/dbname
 poolSize = 10
 debug = false

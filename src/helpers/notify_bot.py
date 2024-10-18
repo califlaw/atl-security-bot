@@ -16,7 +16,9 @@ logger = structlog.stdlib.get_logger("notify.bot")
 
 @asynccontextmanager
 async def notify_supergroup(
-    claim: Claim | None = None, is_general_group: bool = False
+    claim: Claim | None = None,
+    is_general_group: bool = False,
+    optional_text: str | None = None,
 ) -> AsyncGenerator[Claim | None, Bot]:
     bot = Bot(token=settings.get("bot", "token"))
 
@@ -32,7 +34,8 @@ async def notify_supergroup(
 
             await bot.send_message(
                 chat_id=settings.get("bot", "superGroupId"),
-                text=render_template(TemplateFiles.alarm, mapping=claim),
+                text=optional_text
+                or render_template(TemplateFiles.alarm, mapping=claim),
                 **params,
             )
     except (ChatMigrated, TelegramError, NoOptionError) as e:

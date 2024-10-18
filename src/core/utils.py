@@ -5,6 +5,7 @@ import re
 import string
 from asyncio import AbstractEventLoop, Task
 from typing import Any, Callable, Coroutine, Dict, List, Sequence
+from urllib.parse import urlparse
 
 from orjson import orjson
 from telegram import Bot
@@ -21,6 +22,16 @@ url_regex = (
     r"(#[-a-zA-Z0-9_]*)?$"
 )
 username_regex = r"^@\S+"
+
+
+def parse_dsn_url(url_dsn: str) -> Dict:
+    parsed_url = urlparse(url_dsn)
+    return {
+        "host": parsed_url.hostname,
+        "port": parsed_url.port,
+        "db": int(parsed_url.path.lstrip("/")) if parsed_url.path else 0,
+        "password": parsed_url.password,
+    }
 
 
 def unpack_args(args):

@@ -40,24 +40,26 @@ async def start_callback(
             url=settings.get("bot", "communityGroupLink"),
         )
     ]
+    # pass `callback_data` for each button to re-start process command
     header_buttons = [
         InlineKeyboardButton(
             R.string.complain_command,
-            callback_data=CommandEnum.COMPLAIN.value,
+            callback_data=f"conversation_{CommandEnum.COMPLAIN.value}",
         ),
         InlineKeyboardButton(
             R.string.check_link_command,
-            callback_data=CommandEnum.CHECK_LINK.value,
+            callback_data=f"conversation_{CommandEnum.CHECK_LINK.value}",
         ),
         InlineKeyboardButton(
             R.string.check_number_command,
-            callback_data=CommandEnum.CHECK_NUMBER.value,
+            callback_data=f"conversation_{CommandEnum.CHECK_NUMBER.value}",
         ),
         InlineKeyboardButton(
             R.string.check_username_command,
-            callback_data=CommandEnum.CHECK_USERNAME.value,
+            callback_data=f"conversation_{CommandEnum.CHECK_USERNAME.value}",
         ),
     ]
+
     async with ChatActionContext(
         context.bot, chat_id=update.effective_chat.id
     ):
