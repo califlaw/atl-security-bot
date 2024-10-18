@@ -1,7 +1,6 @@
 # ATLCyberBot
 
 
-
 ## Getting started
 ATL Cyber Bot - application to detect claims on Kyrgyzstan world wide network. 
 The most negative persons, who make citizens on low facture mind.
@@ -12,13 +11,13 @@ Everybody could find malefactor and reacted as you need.
 
 ## Add your files
 
-- [x] [Create merge request](https://gitlab.com/kdelinxd/bot-cyber-detection/-/merge_requests) with set reviewer `@kdelinxd`
-- [x] Write on [tg channel](https://t.me/+Ey_WXRTHA7E0YmY1) about new commit MR
+- [x] [Create merge request](https://github.com/AtlantsIT/atl-cyber-bot/pulls) with set reviewer `@kdelinx`
+- [x] Write on [tg channel](https://t.me/+ztaJjDEotH5hZTQ9) about new commit MR
 - [x] Await on approve or comment your version code
 
 ```
 cd existing_repo
-git remote add origin https://gitlab.com/kdelinxd/bot-cyber-detection.git
+git remote add origin https://github.com/AtlantsIT/atl-cyber-bot.git
 git branch -M feature/<your-update-branch-name>
 git push -uf origin feature/<your-update-branch-name>
 ```
@@ -65,7 +64,7 @@ For people who want to make changes to your project, it's helpful to have some d
 You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful.
 
 ## Support
-All support questions accept on [Telegram channel](https://t.me/+Ey_WXRTHA7E0YmY1) or gitlab project issues.
+All support questions accept on [Telegram channel](https://t.me/+ztaJjDEotH5hZTQ9) or gitlab project issues.
 
 ***
 
