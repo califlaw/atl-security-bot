@@ -5,13 +5,13 @@
 ATLANTS SECURITY Bot is an open-source application designed to combat cyber fraud in Kyrgyzstan. Our mission is to protect citizens from the increasing threats posed by cybercriminals and to promote online safety.
 Features
 
-    Report Cyber Fraud: Users can submit complaints about potential instances of cyber fraud, contributing to a collective effort to identify and combat malicious activities online.
+Report Cyber Fraud: Users can submit complaints about potential instances of cyber fraud, contributing to a collective effort to identify and combat malicious activities online.
 
-    Fraud Detection: Check if specific web resources, such as nicknames, credit card numbers, financial applications, and phone numbers, have been flagged in connection with cyber fraud.
+Fraud Detection: Check if specific web resources, such as nicknames, credit card numbers, financial applications, and phone numbers, have been flagged in connection with cyber fraud.
 
-    Community-Driven: The bot empowers users to take an active role in the fight against cybercrime by allowing them to report suspicious activities and share their experiences.
+Community-Driven: The bot empowers users to take an active role in the fight against cybercrime by allowing them to report suspicious activities and share their experiences.
 
-    User-Friendly Interface: The application is designed with user experience in mind, making it easy for anyone to navigate and report issues.
+User-Friendly Interface: The application is designed with user experience in mind, making it easy for anyone to navigate and report issues.
 
 Join Us in the Fight Against Cybercrime!
 
@@ -25,13 +25,13 @@ Together, let's stand up against cyber fraud!
 
 ## Add your files
 
-- [x] [Create merge request](https://github.com/AtlantsIT/atl-cyber-bot/pulls) with set reviewer `@kdelinx`
+- [x] [Create merge request](https://github.com/AtlantsIT/atl-security-bot/pulls) with set reviewer `@kdelinx`
 - [x] Write on [tg channel](https://t.me/+ztaJjDEotH5hZTQ9) about new commit MR
 - [x] Await on approve or comment your version code
 
 ```
 cd existing_repo
-git remote add origin https://github.com/AtlantsIT/atl-cyber-bot.git
+git remote add origin https://github.com/AtlantsIT/atl-security-bot.git
 git branch -M feature/<your-update-branch-name>
 git push -uf origin feature/<your-update-branch-name>
 ```
