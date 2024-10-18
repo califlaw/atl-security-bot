@@ -3,7 +3,6 @@ import sentry_sdk
 from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
 from sentry_sdk.integrations.httpx import HttpxIntegration
-from sentry_sdk.integrations.redis import RedisIntegration
 from telegram.constants import ParseMode
 from telegram.ext import Application, Defaults
 
@@ -31,7 +30,6 @@ async def post_init(_application: Application) -> None:
             profiles_sample_rate=1.0,
             integrations=[
                 HttpxIntegration(),
-                RedisIntegration(),
                 AsyncPGIntegration(),
                 AsyncioIntegration(),
             ],
